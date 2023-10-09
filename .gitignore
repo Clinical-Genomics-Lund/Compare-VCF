@@ -3,3 +3,4 @@ results/
 .vscode/
 *.swp
 **/__pycache__
+testout/

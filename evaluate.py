@@ -31,5 +31,6 @@ for i in range(len(args.inputs)):
 
     datasets[label] = variants
 
+charts.write_variant_count_bars(datasets, f"{args.outdir}/total_counts.png")
 
-charts.write_upset_chart(datasets, f"{args.outdir}/plot.png")
+charts.write_upset_chart(datasets, f"{args.outdir}/overlaps.png")

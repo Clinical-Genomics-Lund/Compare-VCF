@@ -3,10 +3,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def write_variant_count_bars(datasets, outpath):
+def write_variant_count_bars(variant_per_dataset: dict[str, set[str]], outpath: str):
     labels = []
     sizes = []
-    for label, entries in datasets.items():
+    for label, entries in variant_per_dataset.items():
         labels.append(label)
         sizes.append(len(entries))
 
@@ -20,7 +20,7 @@ def write_variant_count_bars(datasets, outpath):
     # plt.close()
 
 
-def write_upset_chart(datasets, outpath):
+def write_upset_chart(datasets: dict[str, set[str]], outpath: str):
     df = upsetplot.from_contents(datasets)
     upsetplot.plot(df)
     plt.savefig(outpath)

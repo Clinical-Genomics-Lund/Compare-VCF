@@ -42,25 +42,28 @@ charts.write_variant_count_bars(dataset_sets, f"{args.outdir}/total_counts.png")
 charts.write_upset_chart(dataset_sets, f"{args.outdir}/overlaps.png")
 
 for ds in datasets.values():
-    if ds.hasRankScores():
-        # Render histogram
-        rank_scores = ds.getRankScores()
+    if not ds.hasRankScores():
+        continue
+    rank_scores = ds.getRankScores()
+    zoom_in_threshold = 10
+    charts.write_histograms(
+        ds.label,
+        rank_scores,
+        zoom_in_threshold,
+        f"{args.outdir}/{ds.label}_rank_histogram.png",
+    )
 
-        zoom_in_threshold = 10
-        charts.write_histograms(
-            ds.label,
-            rank_scores,
-            zoom_in_threshold,
-            f"{args.outdir}/{ds.label}_rank_histogram.png",
-        )
+# FIXME: A bit more tricky - we need to match rank scores on positions
+# Let's start with doing it the ugly way, and then think about refactoring
+nbr_datasets = len(datasets.values())
+dataset_list = list(datasets.values())
+if nbr_datasets >= 2:
+    for i in range(nbr_datasets):
+        for j in range(i + 1, nbr_datasets):
+            ds1 = dataset_list[i]
+            ds2 = dataset_list[j]
 
-
-# Also render scatter charts?
-
-
-# if
-
-# Retrieve comparisons from the R script
-## Extract the rank score - Info RankScore
-
+# Next:
+# Scatter
+# Building the table
 # RTG comparisons

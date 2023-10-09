@@ -57,8 +57,6 @@ def show_histogram(
     yLabel: str | None = None,
     colorThreshold: int | None = None,
 ) -> None:
-    print(f"Writing histogram... {len(rank_scores)} data points")
-
     df = pd.DataFrame({"Scores": rank_scores})
     if colorThreshold is not None:
         color_categories = [
@@ -70,12 +68,6 @@ def show_histogram(
     ax = sns.histplot(df, x="Scores", hue=hue_col, binwidth=1)
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 
-    # plt.hist(rank_scores, bins=bins)
-    # if label is not None:
-    #     plt.title(label)
-    # if xLabel is not None:
-    #     plt.xlabel("Rank")
-    # if yLabel is not None:
-    #     plt.ylabel("Count")
-    # plt.savefig(outpath)
-    # plt.close()
+
+def show_scatter(rank_scores_ds1, rank_scores_ds2) -> None:
+    df = pd.DataFrame({"Dataset 1", "Dataset 2"})

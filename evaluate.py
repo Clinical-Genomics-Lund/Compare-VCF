@@ -1,9 +1,10 @@
 import argparse
-import vcfpy
+
+# import vcfpy
 import sys
 import upsetplot
 from matplotlib import pyplot
-import pysam
+from pysam import VariantFile
 from modules.argparse import parse_arguments
 
 # Draft command
@@ -11,32 +12,36 @@ from modules.argparse import parse_arguments
 
 args = parse_arguments()
 
+labels = []
+if args.labels is not None:
+    labels = args.labels
+else:
+    labels = args.inputs
 
 datasets = dict()
 for i in range(len(args.inputs)):
-    label = args.labels[i]
+    label = labels[i]
     vcf_fp = args.inputs[i]
     print(f"Parsing: {label} ...")
-    reader = vcfpy.Reader.from_path(
-        vcf_fp,
-    )
-
-    if reader is None:
-        print(f"No file found in path: {vcf_fp}")
-        sys.exit(1)
+    vcf_in = VariantFile(vcf_fp)
+    # reader = vcfpy.Reader.from_path(
+    #     vcf_fp,
+    # )
 
     variants = set()
-    for record in reader:
-        if record is None:
-            print(f"No records found in path: {vcf_fp}")
-            sys.exit(1)
-        pos_name = f"{record.CHROM}:{record.POS}"
+    for record in vcf_in.fetch("chr1"):
+        # if record is None:
+        #     print(f"No records found in path: {vcf_fp}")
+        #     sys.exit(1)
+        pos_name = f"{record.contig}:{record.pos}"
         variants.add(pos_name)
 
     datasets[label] = variants
 
+print(datasets.keys())
 df = upsetplot.from_contents(datasets)
 print(df)
+upsetplot.plot(df)
 
 # Next steps:
 # Also load the baseline

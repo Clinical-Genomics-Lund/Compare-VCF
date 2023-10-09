@@ -69,5 +69,27 @@ def show_histogram(
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 
 
-def show_scatter(rank_scores_ds1, rank_scores_ds2) -> None:
-    df = pd.DataFrame({"Dataset 1", "Dataset 2"})
+def write_rank_scatter(
+    rank_scores_ds1: list[int],
+    rank_scores_ds2: list[int],
+    xLabel: str,
+    yLabel: str,
+    outpath: str,
+) -> None:
+    if len(rank_scores_ds1) != len(rank_scores_ds2):
+        raise ValueError(
+            f"Length of value arrays expected to be the same, found {len(rank_scores_ds1)} and {len(rank_scores_ds2)}"
+        )
+    corr_coef = np.corrcoef(rank_scores_ds1, rank_scores_ds2)
+
+    df = pd.DataFrame({"dataset1": rank_scores_ds1, "dataset2": rank_scores_ds2})
+
+    ax = sns.displot(df, x="dataset1", y="dataset2", binwidth=1, cbar=True)
+    # ax = sns.scatterplot(df, x="dataset1", y="dataset2")
+    ax.set(
+        title=f"{xLabel} vs {yLabel} (corr: {round(corr_coef[0][1], 2)})",
+        xlabel=xLabel,
+        ylabel=yLabel,
+    )
+    plt.savefig(outpath, bbox_inches="tight")
+    plt.close()

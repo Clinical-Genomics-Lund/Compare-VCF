@@ -2,6 +2,7 @@ from modules.argparse import parse_arguments
 import modules.charts as charts
 from modules.dataset import Dataset
 import warnings
+import numpy as np
 
 # Upset chart library emits various warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -31,7 +32,7 @@ for i in range(len(args.inputs)):
 
 dataset_sets = dict()
 for key, dataset in datasets.items():
-    dataset_sets[key] = dataset._variants
+    dataset_sets[key] = dataset.variantNames
 
 # dataset_sets = {key: dataset._variants for (key, dataset) in datasets.items()}
 
@@ -62,6 +63,49 @@ if nbr_datasets >= 2:
         for j in range(i + 1, nbr_datasets):
             ds1 = dataset_list[i]
             ds2 = dataset_list[j]
+
+            print("-------")
+            print([var.rankScore for i, var in enumerate(ds1.variants) if i < 10])
+            print([var.rankScore for i, var in enumerate(ds2.variants) if i < 10])
+            print("-------")
+
+            ds1_rank_per_pos = {
+                var.getPosStr(): var.rankScore
+                for var in ds1.variants
+                if var.rankScore is not None
+            }
+            ds2_rank_per_pos = {
+                var.getPosStr(): var.rankScore
+                for var in ds2.variants
+                if var.rankScore is not None
+            }
+
+            shared_keys = set(ds1_rank_per_pos.keys()).intersection(
+                set(ds2_rank_per_pos.keys())
+            )
+
+            if len(shared_keys) == 0:
+                continue
+
+            ds1_ranks = list()
+            ds2_ranks = list()
+            for key in shared_keys:
+                ds1_val = ds1_rank_per_pos[key]
+                ds2_val = ds2_rank_per_pos[key]
+                ds1_ranks.append(ds1_val)
+                ds2_ranks.append(ds2_val)
+
+            print(f"First scatter {ds1_ranks[0:10]}")
+            print(f"Second scatter {ds2_ranks[0:10]}")
+
+
+            charts.write_rank_scatter(
+                ds1_ranks,
+                ds2_ranks,
+                ds1.label,
+                ds2.label,
+                f"{args.outdir}/{ds1.label}_{ds2.label}_ranks.png",
+            )
 
 # Next:
 # Scatter

@@ -15,7 +15,7 @@ vcf2_path <- "data/23MD08256-jakob_test.scored.vcf.gz"
 number_rows <- Inf
 
 vcf1 <- read_tsv(vcf1_path, comment = "##", n_max = number_rows) %>%
-	rename(CHROM = `#CHROM`) %>%
+    rename(CHROM = `#CHROM`) %>%
     mutate(pos = paste(CHROM, POS, sep = ":")) %>%
     mutate(mut = paste(REF, ALT, sep = ",")) %>%
     mutate(rank = INFO %>% gsub(".*RankScore", "", .) %>% gsub(".*:", "", .) %>% gsub(";.*", "", .) %>% as.numeric()) %>%

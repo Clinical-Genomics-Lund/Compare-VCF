@@ -1,5 +1,6 @@
 from modules.argparse import parse_arguments
 import modules.charts as charts
+import modules.table as table
 from modules.dataset import Dataset
 import warnings
 import numpy as np
@@ -107,7 +108,11 @@ if nbr_datasets >= 2:
                 f"{args.outdir}/{ds1.label}_{ds2.label}_ranks.png",
             )
 
+
+table.build_table()
+
+
+
 # Next:
-# Scatter
 # Building the table
 # RTG comparisons

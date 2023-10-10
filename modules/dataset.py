@@ -15,7 +15,7 @@ class Variant:
         return f"{self.contig}:{self.pos}"
 
     def getAlleleStr(self) -> str:
-        return f"{self.ref}:{self.alt}"
+        return f"{self.ref}:{', '.join(list(self.alt))}"
 
     def __init__(self, contig, pos, ref, alt, rankScore):
         self.contig = contig

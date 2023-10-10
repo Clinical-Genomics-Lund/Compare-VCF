@@ -33,7 +33,7 @@ def main():
     # generate_histograms(list(datasets.values()), args.outdir)
     # generate_heatmaps(list(datasets.values()), args.outdir)
 
-    table.build_table()
+    table.build_table(list(datasets.values()), 20)
 
 
 def setup_datasets(input_paths: list[str], labels: list[str], contig: str|None = None) -> dict[str, Dataset]:

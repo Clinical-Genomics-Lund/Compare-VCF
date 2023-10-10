@@ -19,6 +19,10 @@ python evaluate.py \
     --outdir testout
 ```
 
+#### Useful settings
+
+* `--contig "chr1"` Limit analysis to one contig.
+
 ### TODO
 
 Task-list:

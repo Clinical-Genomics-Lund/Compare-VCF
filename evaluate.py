@@ -12,8 +12,8 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # Draft command
 # python evaluate.py --inputs data/231004_lund_wgs_snv/group.scored.chrnamed.autosomal.vcf.gz data/231004_nfcore_rd/giab_full_split_rmdup.chr.vcf.gz data/231006_nfcore_filtered_annotated/giab_full_ranked_snv.chr.dedup_info.vcf.gz --labels wgs nf_deep nf_sent --outdir testout
 
-def main():
 
+def main():
     args = parse_arguments()
 
     labels = []
@@ -22,7 +22,7 @@ def main():
     else:
         labels = args.inputs
 
-    datasets = setup_datasets(args.inputs, labels, "chr1")
+    datasets = setup_datasets(args.inputs, labels, args.contig)
     dataset_sets = dict()
     for key, dataset in datasets.items():
         dataset_sets[key] = dataset.variantNames
@@ -33,10 +33,12 @@ def main():
     # generate_histograms(list(datasets.values()), args.outdir)
     # generate_heatmaps(list(datasets.values()), args.outdir)
 
-    table.build_table(list(datasets.values()), 20)
+    table.build_table(list(datasets.values()), args.topn)
 
 
-def setup_datasets(input_paths: list[str], labels: list[str], contig: str|None = None) -> dict[str, Dataset]:
+def setup_datasets(
+    input_paths: list[str], labels: list[str], contig: str | None = None
+) -> dict[str, Dataset]:
     datasets = dict()
     for i in range(len(input_paths)):
         label = labels[i]
@@ -46,7 +48,6 @@ def setup_datasets(input_paths: list[str], labels: list[str], contig: str|None =
         dataset.parse(contig)
         datasets[label] = dataset
     return datasets
-
 
 
 def generate_histograms(datasets: list[Dataset], outdir: str):

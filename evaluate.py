@@ -3,50 +3,53 @@ import modules.charts as charts
 import modules.table as table
 from modules.dataset import Dataset
 import warnings
-import numpy as np
 import modules.util as util
 
 # Upset chart library emits various warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# Draft command
-# python evaluate.py --inputs data/231004_lund_wgs_snv/group.scored.chrnamed.autosomal.vcf.gz data/231004_nfcore_rd/giab_full_split_rmdup.chr.vcf.gz data/231006_nfcore_filtered_annotated/giab_full_ranked_snv.chr.dedup_info.vcf.gz --labels wgs nf_deep nf_sent --outdir testout
-
 
 def main():
     args = parse_arguments()
 
+    labels = get_labels(args)
+
+    datasets = setup_datasets(args.inputs, labels, args.scorekey, args.contig)
+    variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
+
+    charts.write_variant_count_bars(
+        variant_keys_per_ds, f"{args.outdir}/total_counts.png"
+    )
+    charts.write_upset_chart(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
+
+    generate_histograms(list(datasets), args.outdir)
+    generate_heatmaps(list(datasets), args.outdir)
+    table.build_table(list(datasets), args.topn, f"{args.outdir}/table.tsv")
+
+
+def get_labels(args) -> list[str]:
     labels = []
     if args.labels is not None:
         labels = args.labels
     else:
         labels = args.inputs
-
-    datasets = setup_datasets(args.inputs, labels, args.contig)
-    dataset_sets = dict()
-    for key, dataset in datasets.items():
-        dataset_sets[key] = dataset.variantNames
-
-    # charts.write_variant_count_bars(dataset_sets, f"{args.outdir}/total_counts.png")
-    # charts.write_upset_chart(dataset_sets, f"{args.outdir}/overlaps.png")
-
-    # generate_histograms(list(datasets.values()), args.outdir)
-    # generate_heatmaps(list(datasets.values()), args.outdir)
-
-    table.build_table(list(datasets.values()), args.topn, f"{args.outdir}/table.tsv")
+    return labels
 
 
 def setup_datasets(
-    input_paths: list[str], labels: list[str], contig: str | None = None
-) -> dict[str, Dataset]:
-    datasets = dict()
+    input_paths: list[str],
+    labels: list[str],
+    score_key: str | None = None,
+    contig: str | None = None,
+) -> list[Dataset]:
+    datasets = list()
     for i in range(len(input_paths)):
         label = labels[i]
         vcf_fp = input_paths[i]
         print(f"Parsing: {label} with path {vcf_fp} ...")
         dataset = Dataset(label, vcf_fp)
-        dataset.parse(contig)
-        datasets[label] = dataset
+        dataset.parse(score_key, contig)
+        datasets.append(dataset)
     return datasets
 
 
@@ -65,8 +68,6 @@ def generate_histograms(datasets: list[Dataset], outdir: str):
 
 
 def generate_heatmaps(datasets: list[Dataset], outdir: str):
-    # FIXME: A bit more tricky - we need to match rank scores on positions
-    # Let's start with doing it the ugly way, and then think about refactoring
     nbr_datasets = len(datasets)
     dataset_list = list(datasets)
     if nbr_datasets >= 2:
@@ -87,10 +88,6 @@ def generate_heatmaps(datasets: list[Dataset], outdir: str):
                     f"{outdir}/{ds1.label}_{ds2.label}_ranks.png",
                 )
 
-
-# Next:
-# Building the table
-# RTG comparisons
 
 if __name__ == "__main__":
     main()

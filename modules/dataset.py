@@ -30,7 +30,7 @@ class Variant:
 
 class Dataset:
     label: str
-    variantNames: set[str]
+    # variantNames: set[str]
     variants: list[Variant]
     _variantDict: dict[str, Variant]
     _filepath: str
@@ -39,7 +39,7 @@ class Dataset:
     def __init__(self, label, filename):
         self.label = label
         self._filepath = filename
-        self.variantNames = set()
+        # self.variantNames = set()
         self._rankScores = list()
         self.variants = list()
         self._variantDict = dict()
@@ -53,18 +53,19 @@ class Dataset:
     def getVariantByKey(self, key: str) -> Variant | None:
         return self._variantDict.get(key)
 
-    def parse(self, contigs=None) -> None:
+    def getVariantKeys(self) -> set[str]:
+        return set([var.getKey() for var in self.variants])
+
+    def parse(self, score_key: str | None = None, contigs=None) -> None:
         vcf_in = VariantFile(self._filepath)
         fh = vcf_in.fetch(contigs)
-        has_rank_score = vcf_in.header.info.get(RANK_SCORE) is not None
-        # rank_scores = list()
+        has_rank_score = (
+            score_key is not None and vcf_in.header.info.get(score_key) is not None
+        )
         for record in fh:
-            pos_name = f"{record.contig}:{record.pos}"
-            self.variantNames.add(pos_name)
-
             rank_score = None
-            if has_rank_score:
-                rank_score_cell = record.info.get(RANK_SCORE)
+            if score_key is not None and has_rank_score:
+                rank_score_cell = record.info.get(score_key)
                 rank_score = int(rank_score_cell[0].split(":")[-1])
                 self._rankScores.append(rank_score)
 
@@ -74,7 +75,5 @@ class Dataset:
             self.variants.append(variant)
             self._variantDict[variant.getKey()] = variant
 
-        print(f"Number variants: {len(self.variantNames)}")
-
     def __str__(self):
-        return f"{self.label}\t{len(self.variantNames)}\t{self._filepath}"
+        return f"{self.label}\t{len(self.variants)}\t{self._filepath}"

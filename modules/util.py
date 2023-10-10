@@ -1,32 +1,35 @@
-from modules.dataset import Variant
+from modules.dataset import Dataset
 
 
-def get_shared_ranks(variants1: list[Variant], variants2: list[Variant]) -> tuple[list[int], list[int]]|None:
-    ds1_rank_per_pos = {
-        var.getPosStr(): var.rankScore
-        for var in variants1
-        if var.rankScore is not None
-    }
-    ds2_rank_per_pos = {
-        var.getPosStr(): var.rankScore
-        for var in variants2
-        if var.rankScore is not None
-    }
+def get_scores_for_shared_variants(
+    ds1: Dataset, ds2: Dataset, top_n: int | None, top_from: str = "first"
+) -> list[tuple[str, int, int]]:
+    """Given two arrays of variants, identify shared variants"""
 
-    shared_keys = set(ds1_rank_per_pos.keys()).intersection(
-        set(ds2_rank_per_pos.keys())
-    )
+    if top_n is None:
+        all_keys = ds1.getVariantKeys().union(ds2.getVariantKeys())
+    else:
+        if top_from == "first":
+            all_keys = ds1.getTopScoredVariantKeys(top_n)
+        elif top_from == "second":
+            all_keys = ds2.getTopScoredVariantKeys(top_n)
+        else:
+            raise ValueError(
+                f"top_from should be either first or second, found {top_from}"
+            )
 
-    if len(shared_keys) == 0:
-        return None
+    shared_scores = list()
+    for key in all_keys:
+        ds1_var = ds1.getVariantByKey(key)
+        ds2_var = ds2.getVariantByKey(key)
 
-    ds1_ranks = list()
-    ds2_ranks = list()
-    for key in shared_keys:
-        ds1_val = ds1_rank_per_pos[key]
-        ds2_val = ds2_rank_per_pos[key]
-        ds1_ranks.append(ds1_val)
-        ds2_ranks.append(ds2_val)
+        if ds1_var is None or ds2_var is None:
+            continue
 
-    return (ds1_ranks, ds2_ranks)
+        if ds1_var.score is None or ds2_var.score is None:
+            continue
 
+        shared_score = (key, ds1_var.score, ds2_var.score)
+        shared_scores.append(shared_score)
+
+    return shared_scores

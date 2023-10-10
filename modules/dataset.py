@@ -1,15 +1,12 @@
 from pysam import VariantFile
 
 
-RANK_SCORE = "RankScore"
-
-
 class Variant:
     contig: str
     pos: int
     ref: str
     alt: str
-    rankScore: int | None
+    score: int | None
 
     def getPosStr(self) -> str:
         return f"{self.contig}:{self.pos}"
@@ -25,12 +22,11 @@ class Variant:
         self.pos = pos
         self.ref = ref
         self.alt = alt
-        self.rankScore = rankScore
+        self.score = rankScore
 
 
 class Dataset:
     label: str
-    # variantNames: set[str]
     variants: list[Variant]
     _variantDict: dict[str, Variant]
     _filepath: str
@@ -39,15 +35,14 @@ class Dataset:
     def __init__(self, label, filename):
         self.label = label
         self._filepath = filename
-        # self.variantNames = set()
         self._rankScores = list()
         self.variants = list()
         self._variantDict = dict()
 
-    def hasRankScores(self) -> bool:
+    def hasScores(self) -> bool:
         return len(self._rankScores) > 0
 
-    def getRankScores(self) -> list[int]:
+    def getScores(self) -> list[int]:
         return self._rankScores
 
     def getVariantByKey(self, key: str) -> Variant | None:
@@ -55,6 +50,15 @@ class Dataset:
 
     def getVariantKeys(self) -> set[str]:
         return set([var.getKey() for var in self.variants])
+
+    def getTopScoredVariantKeys(self, top_n: int) -> set[str]:
+        sorted_variants = sorted(
+            self.variants,
+            key=lambda var: var.score if var.score is not None else -1,
+            reverse=True,
+        )
+        variant_keys = [var.getKey() for var in sorted_variants[0:top_n]]
+        return set(variant_keys)
 
     def parse(self, score_key: str | None = None, contigs=None) -> None:
         vcf_in = VariantFile(self._filepath)

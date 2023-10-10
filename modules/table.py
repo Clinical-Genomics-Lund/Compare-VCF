@@ -4,15 +4,16 @@ import pandas as pd
 TopKeysPerDs = dict[str, set[str]]
 
 
-def build_table(datasets: list[Dataset], top_n: int, outpath: str):
-    datasets_w_scores = [ds for ds in datasets if ds.hasRankScores()]
+def write_score_table(datasets: list[Dataset], top_n: int, outpath: str):
+    datasets_w_scores = [ds for ds in datasets if ds.hasScores()]
 
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets_w_scores, top_n)
-    top_df = build_df(datasets_w_scores, all_top_keys, top_keys_per_ds, top_n)
+    top_df = build_data_frame(datasets_w_scores, all_top_keys, top_keys_per_ds, top_n)
     top_df.to_csv(outpath, sep="\t", index=False)
 
 
-def build_df(
+# FIXME: Think about how this can be handled more elegantly
+def build_data_frame(
     datasets: list[Dataset],
     all_top_keys: set[str],
     top_keys_per_ds: TopKeysPerDs,
@@ -28,7 +29,7 @@ def build_df(
         for key in all_top_keys:
             var = ds.getVariantByKey(key)
             is_present = var is not None
-            score = var.rankScore if is_present else None
+            score = var.score if is_present else None
             in_top = key in top_keys_per_ds[ds.label]
 
             ds_is_present.append(is_present)
@@ -51,8 +52,8 @@ def get_top_scored_keys(
     top_keys_per_ds: dict[str, set[str]] = dict()
 
     def sort_fn(variant: Variant):
-        if variant.rankScore is not None:
-            return variant.rankScore
+        if variant.score is not None:
+            return variant.score
         else:
             return -1
 

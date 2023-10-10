@@ -4,13 +4,15 @@ The common use case would be that different technical approaches have been used 
 
 ### Install dependencies
 
+This is recommended to do within a `venv` environment ([link](https://docs.python.org/3/library/venv.html))
+
 ```
 pip install -r requirements.txt
 ```
 
 ### Usage
 
-Inputs can be gzipped.
+Inputs can be gzipped:
 
 ```
 python evaluate.py \
@@ -19,24 +21,43 @@ python evaluate.py \
     --outdir testout
 ```
 
-#### Useful settings
+Extended command:
 
+```
+python evaluate.py \
+    --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
+    --labels first second third \
+    --outdir testout \
+    --scorekey RankScore \
+    --topn 200
+```
+
+#### Other settings
+
+* `--scorekey` Scoring in INFO field determining what variants are "top ranked".
+* `--topn` Among the "top ranked" variants, how many to study.
 * `--contig "chr1"` Limit analysis to one contig.
 
-### TODO
+### Outputs
 
-Task-list:
+Number called variants among the different vcf-files.
 
-* Table comparison of top-list
-* Correlation calculation of "top-X" features
-* RTG convenience wrapper (for GIAB samples only)
+![Total counts](docs/1_total_counts.png)
 
-For now, `rtg` has been used as below.
+Overlaps among the called variants. More info on the upset chart can be found [here](https://en.wikipedia.org/wiki/UpSet_Plot)
 
-```
-/src/bnf/rtg-tools-3.12.1/rtg vcfeval \
-    --baseline data/231004_giab_nist/HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz \
-    -c data/231006_nfcore_filtered_annotated/testout.vcf.gz \
-    --output testrun -t data/GRCh38.sdf
-```
+![Overlaps among counts](docs/2_overlaps.png)
 
+If a scoring metric is provided, histograms of the scores are generated for each dataset.
+
+![Score histograms](docs/3_score_histograms.png)
+
+If a scoring metric is provided, heatmaps comparing the number of features with shared scorings are also generated.
+
+![Score heatmaps](docs/4_score_heatmap.png)
+
+
+### Planned extensions
+
+* More detailed annotation information in the output table.
+* Use the GIAB as a reference base line.

@@ -27,11 +27,11 @@ def main():
     for key, dataset in datasets.items():
         dataset_sets[key] = dataset.variantNames
 
-    charts.write_variant_count_bars(dataset_sets, f"{args.outdir}/total_counts.png")
-    charts.write_upset_chart(dataset_sets, f"{args.outdir}/overlaps.png")
+    # charts.write_variant_count_bars(dataset_sets, f"{args.outdir}/total_counts.png")
+    # charts.write_upset_chart(dataset_sets, f"{args.outdir}/overlaps.png")
 
-    generate_histograms(list(datasets.values()), args.outdir)
-    generate_heatmaps(list(datasets.values()), args.outdir)
+    # generate_histograms(list(datasets.values()), args.outdir)
+    # generate_heatmaps(list(datasets.values()), args.outdir)
 
     table.build_table()
 

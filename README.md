@@ -1,10 +1,31 @@
-Overview information should come here
+The purpose of this tool is to provide convenient utilities to evaluate calling and annotation differences between VCF files.
 
-Analysis scripts, should probably be organized in the `scripts` folder.
+The common use case would be that different technical approaches have been used for the same biological samples, and that the impact from these choices need to be understood.
 
-First prepare chromosome-based names with `tbi` index.
+### Install dependencies
 
-If multiple annotations, it can be run using the `remove_duplicate_info.py` script (which simply seems to put INFO in a dictionary, resulting in the trimming of that field).
+```
+pip install -r requirements.txt
+```
+
+### Usage
+
+Inputs can be gzipped.
+
+```
+python evaluate.py \
+    --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
+    --labels first second third \
+    --outdir testout
+```
+
+### TODO
+
+Task-list:
+
+* Table comparison of top-list
+* Correlation calculation of "top-X" features
+* RTG convenience wrapper (for GIAB samples only)
 
 For now, `rtg` has been used as below.
 
@@ -15,6 +36,3 @@ For now, `rtg` has been used as below.
     --output testrun -t data/GRCh38.sdf
 ```
 
-Things to fix:
-
-* X, Y and MT chromosomes?

@@ -20,7 +20,6 @@ def build_data_frame(
 ) -> pd.DataFrame:
     table_dict: dict[str, list[bool | int | str]] = dict()
     table_dict["key"] = list(all_top_keys)
-    score_labels = list()
     for ds in datasets:
         ds_top_keys = top_keys_per_ds[ds.label]
         ds_cols = get_dataset_columns(ds, all_top_keys, ds_top_keys, top_n)
@@ -32,6 +31,7 @@ def build_data_frame(
             table_dict[key] = col
 
     top_df = pd.DataFrame(table_dict)
+    score_labels = [f"{ds.label}_score" for ds in datasets]
     top_df.sort_values(by=score_labels, inplace=True, ascending=False)
     return top_df
 
@@ -40,6 +40,7 @@ def get_dataset_columns(
     ds: Dataset, all_top_keys: set[str], ds_top_keys: set[str], top_n: int
 ) -> dict[str, list[bool | int | str]]:
     col_dict = dict()
+    # FIXME: Avoid hard-coding, lift this up from this function
     present_label = f"{ds.label}_present"
     col_dict[present_label] = [
         ds.getVariantByKey(key) is not None for key in all_top_keys

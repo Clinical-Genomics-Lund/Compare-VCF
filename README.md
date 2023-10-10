@@ -56,6 +56,9 @@ If a scoring metric is provided, heatmaps comparing the number of features with 
 
 ![Score heatmaps](docs/4_score_heatmap.png)
 
+Score table. This will be extended.
+
+![Score table](docs/5_score_table.PNG)
 
 ### Planned extensions
 

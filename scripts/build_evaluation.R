@@ -1,13 +1,16 @@
 library(tidyverse)
 
+# readClipboard()
+
 # Set the path
-setwd("\\\\wsl.localhost\\Ubuntu-22.04\\home\\jakob\\proj\\230920_rd_evaluate\\data")
+setwd("/home/jakob/proj/230920_rd_evaluate")
+# setwd("\\\\wsl.localhost\\Ubuntu-22.04\\home\\jakob\\proj\\230920_rd_evaluate\\data")
 
 # vcf1_path <- "\\\\wsl.localhost\\Ubuntu-22.04\\home\\jakob\\proj\\230920_rd_evaluate\\data\\23MD08776-testrun.scored.vcf.gz"
 # vcf2_path <- "\\\\wsl.localhost\\Ubuntu-22.04\\home\\jakob\\proj\\230920_rd_evaluate\\data\\23MD08256-jakob_test.scored.vcf.gz"
 
-vcf1_path <- "23MD08776-testrun.scored.vcf.gz"
-vcf2_path <- "23MD08256-jakob_test.scored.vcf.gz"
+vcf1_path <- "data/23MD08776-testrun.scored.vcf.gz"
+vcf2_path <- "data/23MD08256-jakob_test.scored.vcf.gz"
 
 number_rows <- Inf
 
@@ -50,7 +53,7 @@ plt <- ggplot(joined_vcf_df %>% filter(!is.na(rank.y)), aes(x=rank.y)) +
 ggsave(filename="hist2.png", plt)
 
 # Table
-rank_table <- joined_vcf %>% filter(rank.x >= 17 | rank.y >= 17) %>% arrange(desc(rank.x), desc(rank.y))
+rank_table <- joined_vcf %>% filter(rank.x >= 12 | rank.y >= 12) %>% arrange(desc(rank.x), desc(rank.y))
 rank_table
 
-write_tsv(rank_table, path="rank_table.tsv")
+write_tsv(rank_table, file="rank_table.tsv")

@@ -2,3 +2,4 @@ data/
 results/
 .vscode/
 *.swp
+**/__pycache__

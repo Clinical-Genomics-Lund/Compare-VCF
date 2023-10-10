@@ -1,3 +1,4 @@
+from matplotlib.colors import LogNorm
 import upsetplot
 from matplotlib import pyplot as plt
 import numpy as np
@@ -69,7 +70,7 @@ def show_histogram(
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 
 
-def write_rank_scatter(
+def write_rank_heatmap(
     rank_scores_ds1: list[int],
     rank_scores_ds2: list[int],
     xLabel: str,
@@ -83,9 +84,14 @@ def write_rank_scatter(
     corr_coef = np.corrcoef(rank_scores_ds1, rank_scores_ds2)
 
     df = pd.DataFrame({"dataset1": rank_scores_ds1, "dataset2": rank_scores_ds2})
-
-    ax = sns.displot(df, x="dataset1", y="dataset2", binwidth=1, cbar=True)
-    # ax = sns.scatterplot(df, x="dataset1", y="dataset2")
+    ax = sns.displot(
+        df,
+        x="dataset1",
+        y="dataset2",
+        binwidth=1,
+        cbar=True,
+        alpha=1,
+    )
     ax.set(
         title=f"{xLabel} vs {yLabel} (corr: {round(corr_coef[0][1], 2)})",
         xlabel=xLabel,

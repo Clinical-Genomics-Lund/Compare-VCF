@@ -80,7 +80,7 @@ def generate_heatmaps(datasets: list[Dataset], outdir: str):
                 if shared_ranks is None:
                     continue
                 (ranks1, ranks2) = shared_ranks
-                charts.write_rank_scatter(
+                charts.write_rank_heatmap(
                     ranks1,
                     ranks2,
                     ds1.label,

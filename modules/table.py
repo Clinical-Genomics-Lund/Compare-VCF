@@ -12,47 +12,43 @@ def write_score_table(datasets: list[Dataset], top_n: int, outpath: str):
     top_df.to_csv(outpath, sep="\t", index=False)
 
 
-# FIXME: Think about how this can be handled more elegantly
 def build_data_frame(
     datasets: list[Dataset],
     all_top_keys: set[str],
     top_keys_per_ds: TopKeysPerDs,
     top_n: int,
 ) -> pd.DataFrame:
-    table_dict = dict()
+    table_dict: dict[str, list[bool | int | str]] = dict()
     table_dict["key"] = list(all_top_keys)
     score_labels = list()
     for ds in datasets:
-        # ds_is_present = []
-        # ds_scores = []
-        # ds_among_top = []
-        # for key in all_top_keys:
-        #     var = ds.getVariantByKey(key)
-        #     is_present = var is not None
-        #     score = var.score if is_present else None
-        #     in_top = key in top_keys_per_ds[ds.label]
+        ds_top_keys = top_keys_per_ds[ds.label]
+        ds_cols = get_dataset_columns(ds, all_top_keys, ds_top_keys, top_n)
 
-        #     ds_is_present.append(is_present)
-        #     ds_scores.append(score)
-        #     ds_among_top.append(in_top)
+        for key, col in ds_cols.items():
+            assert (
+                key not in table_dict.keys()
+            ), f"{key} already present in table_dict, among keys: {', '.join(list(table_dict.keys()))}"
+            table_dict[key] = col
 
-        present_label = f"{ds.label}_present"
-        table_dict[present_label] = [
-            ds.getVariantByKey(key) is not None for key in all_top_keys
-        ]
-        top_n_label = f"{ds.label}_top{top_n}"
-        table_dict[top_n_label] = [
-            key in top_keys_per_ds[ds.label] for key in all_top_keys
-        ]
-        score_label = f"{ds.label}_score"
-        table_dict[score_label] = [ds.getScoreByKey(key) for key in all_top_keys]
-        # table_dict[f"{ds.label}_present"] = ds_is_present
-        # table_dict[f"{ds.label}_top{top_n}"] = ds_among_top
-        # table_dict[score_label] = ds_scores
-        # score_labels.append(score_label)
     top_df = pd.DataFrame(table_dict)
     top_df.sort_values(by=score_labels, inplace=True, ascending=False)
     return top_df
+
+
+def get_dataset_columns(
+    ds: Dataset, all_top_keys: set[str], ds_top_keys: set[str], top_n: int
+) -> dict[str, list[bool | int | str]]:
+    col_dict = dict()
+    present_label = f"{ds.label}_present"
+    col_dict[present_label] = [
+        ds.getVariantByKey(key) is not None for key in all_top_keys
+    ]
+    top_n_label = f"{ds.label}_top{top_n}"
+    col_dict[top_n_label] = [key in ds_top_keys for key in all_top_keys]
+    score_label = f"{ds.label}_score"
+    col_dict[score_label] = [ds.getScoreByKey(key) for key in all_top_keys]
+    return col_dict
 
 
 def get_top_scored_keys(

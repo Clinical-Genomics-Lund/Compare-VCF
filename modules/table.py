@@ -23,23 +23,33 @@ def build_data_frame(
     table_dict["key"] = list(all_top_keys)
     score_labels = list()
     for ds in datasets:
-        ds_is_present = []
-        ds_scores = []
-        ds_among_top = []
-        for key in all_top_keys:
-            var = ds.getVariantByKey(key)
-            is_present = var is not None
-            score = var.score if is_present else None
-            in_top = key in top_keys_per_ds[ds.label]
+        # ds_is_present = []
+        # ds_scores = []
+        # ds_among_top = []
+        # for key in all_top_keys:
+        #     var = ds.getVariantByKey(key)
+        #     is_present = var is not None
+        #     score = var.score if is_present else None
+        #     in_top = key in top_keys_per_ds[ds.label]
 
-            ds_is_present.append(is_present)
-            ds_scores.append(score)
-            ds_among_top.append(in_top)
-        table_dict[f"{ds.label}_present"] = ds_is_present
-        table_dict[f"{ds.label}_top{top_n}"] = ds_among_top
+        #     ds_is_present.append(is_present)
+        #     ds_scores.append(score)
+        #     ds_among_top.append(in_top)
+
+        present_label = f"{ds.label}_present"
+        table_dict[present_label] = [
+            ds.getVariantByKey(key) is not None for key in all_top_keys
+        ]
+        top_n_label = f"{ds.label}_top{top_n}"
+        table_dict[top_n_label] = [
+            key in top_keys_per_ds[ds.label] for key in all_top_keys
+        ]
         score_label = f"{ds.label}_score"
-        table_dict[score_label] = ds_scores
-        score_labels.append(score_label)
+        table_dict[score_label] = [ds.getScoreByKey(key) for key in all_top_keys]
+        # table_dict[f"{ds.label}_present"] = ds_is_present
+        # table_dict[f"{ds.label}_top{top_n}"] = ds_among_top
+        # table_dict[score_label] = ds_scores
+        # score_labels.append(score_label)
     top_df = pd.DataFrame(table_dict)
     top_df.sort_values(by=score_labels, inplace=True, ascending=False)
     return top_df

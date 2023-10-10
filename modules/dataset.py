@@ -48,6 +48,12 @@ class Dataset:
     def getVariantByKey(self, key: str) -> Variant | None:
         return self._variantDict.get(key)
 
+    def getScoreByKey(self, key: str) -> int | None:
+        var = self._variantDict.get(key)
+        if var is None:
+            return None
+        return var.score
+
     def getVariantKeys(self) -> set[str]:
         return set([var.getKey() for var in self.variants])
 

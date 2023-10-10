@@ -1,5 +1,9 @@
 from modules.dataset import Dataset
 import modules.util as util
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 
 
 # FIXME: Simplify this code. The data parsing prior to writing the heatmap should be made more elegant

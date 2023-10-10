@@ -33,7 +33,7 @@ def main():
     # generate_histograms(list(datasets.values()), args.outdir)
     # generate_heatmaps(list(datasets.values()), args.outdir)
 
-    table.build_table(list(datasets.values()), args.topn)
+    table.build_table(list(datasets.values()), args.topn, f"{args.outdir}/table.tsv")
 
 
 def setup_datasets(

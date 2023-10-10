@@ -17,6 +17,9 @@ class Variant:
     def getAlleleStr(self) -> str:
         return f"{self.ref}:{', '.join(list(self.alt))}"
 
+    def getKey(self) -> str:
+        return f"{self.getPosStr()}-{self.getAlleleStr()}"
+
     def __init__(self, contig, pos, ref, alt, rankScore):
         self.contig = contig
         self.pos = pos
@@ -29,6 +32,7 @@ class Dataset:
     label: str
     variantNames: set[str]
     variants: list[Variant]
+    _variantDict: dict[str, Variant]
     _filepath: str
     _rankScores: list[int]
 
@@ -38,12 +42,16 @@ class Dataset:
         self.variantNames = set()
         self._rankScores = list()
         self.variants = list()
+        self._variantDict = dict()
 
     def hasRankScores(self) -> bool:
         return len(self._rankScores) > 0
 
     def getRankScores(self) -> list[int]:
         return self._rankScores
+
+    def getVariantByKey(self, key: str) -> Variant | None:
+        return self._variantDict.get(key)
 
     def parse(self, contigs=None) -> None:
         vcf_in = VariantFile(self._filepath)
@@ -64,6 +72,7 @@ class Dataset:
                 record.contig, record.pos, record.ref, record.alts, rank_score
             )
             self.variants.append(variant)
+            self._variantDict[variant.getKey()] = variant
 
         print(f"Number variants: {len(self.variantNames)}")
 

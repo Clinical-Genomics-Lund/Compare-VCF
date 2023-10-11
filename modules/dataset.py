@@ -1,30 +1,84 @@
-from pysam import VariantFile
+from pysam import VariantFile, VariantHeader
 
 
 class Variant:
     contig: str
     pos: int
-    ref: str
-    alt: str
+    ref: str | None
+    alt: tuple[str] | None
     score: int | None
-    info: dict[str, int | str | float | list]
+    info: dict[str, tuple[str]]
+    header: VariantHeader
 
     def getPosStr(self) -> str:
         return f"{self.contig}:{self.pos}"
 
     def getAlleleStr(self) -> str:
+        if self.alt is None:
+            return ""
         return f"{self.ref}:{', '.join(list(self.alt))}"
 
     def getKey(self) -> str:
         return f"{self.getPosStr()}-{self.getAlleleStr()}"
 
-    def __init__(self, contig, pos, ref, alt, rankScore, info):
+    def getCSQ(self) -> dict[str, str]:
+        if self.info.get("CSQ") is None:
+            return dict()
+
+        assert self.header.info.get("CSQ") != None
+
+        # FIXME: Looks like a helper function
+        header_string = self.header.info.get("CSQ")
+        # FIXME: Check, does this always hold?
+        assert header_string.description is not None
+        # FIXME: More robust with regex
+        header_fields = header_string.description.split("Format: ")[1].split("|")
+
+        # print("---- header string ----")
+        # print(header_string.description.split("Format: ")[1])
+        # print("---- value string ----")
+        value_string = self.info["CSQ"][0]
+        # print("----")
+        values = value_string.split("|")
+
+        # print(header_string.description)
+        # print(value_string)
+        # print("------")
+
+        # FIXME: Further investigate the number diffs here
+
+        print("-----")
+        print(header_fields)
+        print("-----")
+        print(values)
+        print("-----")
+
+        assert len(header_fields) == len(values), print(len(header_fields), len(values))
+
+        csq_dict = dict()
+        for i in range(len(header_fields)):
+            header = header_fields[i]
+            value = values[i]
+            csq_dict[header] = value
+        return csq_dict
+
+    def __init__(
+        self,
+        contig: str,
+        pos: int,
+        ref: str | None,
+        alt: tuple[str] | None,
+        rankScore: int | None,
+        info: dict[str, str | int | bool | list],
+        header: VariantHeader,
+    ):
         self.contig = contig
         self.pos = pos
         self.ref = ref
         self.alt = alt
         self.score = rankScore
         self.info = info
+        self.header = header
 
 
 class Dataset:
@@ -89,9 +143,10 @@ class Dataset:
                 record.contig,
                 record.pos,
                 record.ref,
-                record.alts,
+                tuple(record.alts),
                 rank_score,
                 {item[0]: item[1] for item in record.info.items()},
+                record.header,
             )
             self.variants.append(variant)
             self._variantDict[variant.getKey()] = variant

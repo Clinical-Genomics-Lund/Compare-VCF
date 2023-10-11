@@ -16,11 +16,17 @@ def write_annotations_table(datasets: list[Dataset], filepath: str):
         annot_dict = dict()
         variants = ds.variants
         annot_dict["sample"] = ds.label
-        for variant in variants:
-            for info_key, info_value in variant.info.items():
+        for i, variant in enumerate(variants):
+            print(f"Working with label: {ds.label} variant nbr: {i}")
+            for info_key, _info_value in variant.info.items():
                 if annot_dict.get(info_key) is None:
                     annot_dict[info_key] = [0]
                 annot_dict[info_key][0] += 1
+            for csq_key, _csq_value in variant.getCSQ().items():
+                if annot_dict.get(csq_key) is None:
+                    annot_dict[csq_key] = [0]
+                annot_dict[csq_key][0] += 1
+
         annot_dicts.append(annot_dict)
 
     # Seems secessary to convert the dict into pandas Data Frame?

@@ -7,6 +7,7 @@ class Variant:
     ref: str
     alt: str
     score: int | None
+    info: dict[str, int | str | float | list]
 
     def getPosStr(self) -> str:
         return f"{self.contig}:{self.pos}"
@@ -17,20 +18,22 @@ class Variant:
     def getKey(self) -> str:
         return f"{self.getPosStr()}-{self.getAlleleStr()}"
 
-    def __init__(self, contig, pos, ref, alt, rankScore):
+    def __init__(self, contig, pos, ref, alt, rankScore, info):
         self.contig = contig
         self.pos = pos
         self.ref = ref
         self.alt = alt
         self.score = rankScore
+        self.info = info
 
 
 class Dataset:
-    label: str
-    variants: list[Variant]
+    __fh: VariantFile
     _variantDict: dict[str, Variant]
     _filepath: str
     _rankScores: list[int]
+    label: str
+    variants: list[Variant]
 
     def __init__(self, label, filename):
         self.label = label
@@ -66,11 +69,14 @@ class Dataset:
         variant_keys = [var.getKey() for var in sorted_variants[0:top_n]]
         return set(variant_keys)
 
+    def getAnnotations(self) -> list[str]:
+        return [info[0] for info in self.__fh.header.info.items()]
+
     def parse(self, score_key: str | None = None, contigs=None) -> None:
-        vcf_in = VariantFile(self._filepath)
-        fh = vcf_in.fetch(contigs)
+        self.__fh = VariantFile(self._filepath)
+        fh = self.__fh.fetch(contigs)
         has_rank_score = (
-            score_key is not None and vcf_in.header.info.get(score_key) is not None
+            score_key is not None and self.__fh.header.info.get(score_key) is not None
         )
         for record in fh:
             rank_score = None
@@ -80,7 +86,12 @@ class Dataset:
                 self._rankScores.append(rank_score)
 
             variant = Variant(
-                record.contig, record.pos, record.ref, record.alts, rank_score
+                record.contig,
+                record.pos,
+                record.ref,
+                record.alts,
+                rank_score,
+                {item[0]: item[1] for item in record.info.items()},
             )
             self.variants.append(variant)
             self._variantDict[variant.getKey()] = variant

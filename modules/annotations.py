@@ -45,17 +45,4 @@ def write_annotations_table(datasets: list[Dataset], filepath: str):
     # annot_dicts_lists = {item[0]: [item[1]] for item in annot_dicts}
     annot_dfs = [pd.DataFrame(annot_dict) for annot_dict in annot_dicts_with_counts]
     combined_df = pd.concat(annot_dfs)
-
-    # label3 = datasets[0].label
-    # annot3_dict = {"CADD": 0, "VCF": "X", "INDEL": 5}
-    # annot3_df = pd.DataFrame(annot1_dict)
-
-    # out_df = pd.DataFrame(
-    #     {
-    #         "sample": ["ds1", "ds2"],
-    #         "CADD": [3, 4],
-    #         "VCF": [None, "C"],
-    #         "INDEL": [2, None],
-    #     }
-    # )
-    combined_df.to_csv(filepath, sep="\t", index=False)
+    combined_df.set_index("sample").transpose().to_csv(filepath, sep="\t")

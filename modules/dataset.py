@@ -34,24 +34,8 @@ class Variant:
         # FIXME: More robust with regex
         header_fields = header_string.description.split("Format: ")[1].split("|")
 
-        # print("---- header string ----")
-        # print(header_string.description.split("Format: ")[1])
-        # print("---- value string ----")
         value_string = self.info["CSQ"][0]
-        # print("----")
         values = value_string.split("|")
-
-        # print(header_string.description)
-        # print(value_string)
-        # print("------")
-
-        # FIXME: Further investigate the number diffs here
-
-        print("-----")
-        print(header_fields)
-        print("-----")
-        print(values)
-        print("-----")
 
         assert len(header_fields) == len(values), print(len(header_fields), len(values))
 

@@ -16,22 +16,34 @@ def write_annotations_table(datasets: list[Dataset], filepath: str):
         annot_dict = dict()
         variants = ds.variants
         annot_dict["sample"] = ds.label
-        for i, variant in enumerate(variants):
-            print(f"Working with label: {ds.label} variant nbr: {i}")
+
+        nbr_annots = 0
+        nbr_csqs = 0
+
+        for variant in variants:
             for info_key, _info_value in variant.info.items():
                 if annot_dict.get(info_key) is None:
                     annot_dict[info_key] = [0]
+                    nbr_annots += 1
                 annot_dict[info_key][0] += 1
             for csq_key, _csq_value in variant.getCSQ().items():
-                if annot_dict.get(csq_key) is None:
-                    annot_dict[csq_key] = [0]
-                annot_dict[csq_key][0] += 1
+                # print(f"Hitting csq key {csq_key}")
+                dict_key = f"csq_{csq_key}"
+                if annot_dict.get(dict_key) is None:
+                    annot_dict[dict_key] = [0]
+                    nbr_csqs += 1
+                annot_dict[dict_key][0] += 1
+
+        print(f"Found {nbr_annots} annots {nbr_csqs} csqs for {ds.label}")
 
         annot_dicts.append(annot_dict)
 
+    annot_dicts_with_counts = [d for d in annot_dicts if len(d.keys()) > 1]
+    print(len(annot_dicts_with_counts))
+
     # Seems secessary to convert the dict into pandas Data Frame?
     # annot_dicts_lists = {item[0]: [item[1]] for item in annot_dicts}
-    annot_dfs = [pd.DataFrame(annot_dict) for annot_dict in annot_dicts]
+    annot_dfs = [pd.DataFrame(annot_dict) for annot_dict in annot_dicts_with_counts]
     combined_df = pd.concat(annot_dfs)
 
     # label3 = datasets[0].label

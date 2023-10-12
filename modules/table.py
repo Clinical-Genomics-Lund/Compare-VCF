@@ -1,11 +1,14 @@
-from modules.dataset import Dataset, Variant
 import pandas as pd
+
+from modules.dataset import Dataset, Variant
+import modules.util as util
+
 
 TopKeysPerDs = dict[str, set[str]]
 
 
 def write_score_table(
-    datasets: list[Dataset], top_n: int, outpath: str, rankmodels: list[str] | None
+    datasets: list[Dataset], top_n: int, outpath: str, rankmodel_paths: list[str] | None
 ):
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets, top_n)
     variant_key = "key"
@@ -13,14 +16,24 @@ def write_score_table(
         datasets, all_top_keys, top_keys_per_ds, top_n, variant_key
     )
 
+    # # FIXME: Refactor
+    # if rankmodel_paths is not None:
+    #     config = ConfigObj(rankmodel_paths[0])
+    #     categories_section = config["Categories"]
+    #     categories_keys = categories_section.keys()  # type: ignore
+    #     print(categories_keys)
+
     # FIXME: Cleanup in this part
     # Some function extraction
     # Some simplification
-    for ds in datasets:
+    for i, ds in enumerate(datasets):
         rank_result_strings = list()
         rank_result_dicts = list()
+
+        # FIXME: Handle that this isn't always present
+        rankscore_categories = util.get_rankscore_categories(rankmodel_paths[i])
+
         for key in top_df.index:
-            print(f"Finding {key}")
             variant = ds.getVariantByKey(key)
             single_rank_result_dict = {"key": key}
             if variant is None:
@@ -36,7 +49,9 @@ def write_score_table(
 
                 values = [int(val) for val in rank_result_str.split("|")]
                 for i, val in enumerate(values):
-                    single_rank_result_dict[f"{ds.label}_{i}"] = val
+                    single_rank_result_dict[
+                        f"{ds.label}_{rankscore_categories[i]}"
+                    ] = val
                 rank_result_dicts.append(single_rank_result_dict)
             else:
                 rank_result_strings.append(None)

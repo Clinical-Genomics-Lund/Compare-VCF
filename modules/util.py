@@ -1,4 +1,5 @@
 from modules.dataset import Dataset
+from configobj import ConfigObj
 
 
 def get_scores_for_shared_variants(
@@ -33,3 +34,11 @@ def get_scores_for_shared_variants(
         shared_scores.append(shared_score)
 
     return shared_scores
+
+
+def get_rankscore_categories(rankmodel_path: str) -> list[str]:
+    config = ConfigObj(rankmodel_path)
+    categories_section = config["Categories"]
+    categories_keys = categories_section.keys()  # type: ignore
+    print(categories_keys)
+    return categories_keys

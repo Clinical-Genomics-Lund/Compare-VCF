@@ -4,9 +4,11 @@ from modules.dataset import Dataset, Variant
 import modules.util as util
 
 
+# Types
 TopKeysPerDs = dict[str, set[str]]
 
 
+# Constants
 RANK_RESULT = "RankResult"
 CATEGORIES_KEY = "Categories"
 

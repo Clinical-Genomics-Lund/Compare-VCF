@@ -1,5 +1,6 @@
-from modules.dataset import Dataset
 from configobj import ConfigObj
+
+from modules.dataset import Dataset
 
 
 def get_scores_for_shared_variants(

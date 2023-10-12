@@ -1,5 +1,6 @@
-from modules.dataset import Dataset
 import pandas as pd
+
+from modules.dataset import Dataset
 
 
 def write_annotations_table(datasets: list[Dataset], filepath: str):

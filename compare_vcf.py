@@ -1,11 +1,12 @@
+import warnings
+import os
+
 from modules.argparse import parse_arguments
 import modules.charts as charts
 import modules.heatmap as heatmap
-import modules.table as table
+import modules.ranktable as ranktable
 import modules.annotations as annotations
 from modules.dataset import Dataset
-import warnings
-import os
 
 # Upset chart library emits various warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -33,7 +34,7 @@ def main():
     heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
 
     if len(datasets_w_score) > 0:
-        table.write_score_table(
+        ranktable.write_score_table(
             datasets_w_score,
             args.topn,
             f"{args.outdir}/rank_table_top{args.topn}.tsv",

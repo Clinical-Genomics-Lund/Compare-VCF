@@ -6,7 +6,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 
-def write_heatmaps(datasets: list[Dataset], outdir: str, top_n: int):
+def write_freq_heatmaps(datasets: list[Dataset], outdir: str, top_n: int):
     nbr_datasets = len(datasets)
     if nbr_datasets >= 2:
         for i in range(nbr_datasets):

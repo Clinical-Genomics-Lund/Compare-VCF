@@ -19,18 +19,18 @@ def main():
     variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
     os.makedirs(args.outdir, exist_ok=True)
 
-    # charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
-    # charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
+    charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
+    charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
 
-    # for ds in datasets_w_score:
-    #     charts.write_histogram_pair(
-    #         ds.label,
-    #         ds.getScores(),
-    #         args.topn,
-    #         f"{args.outdir}/{ds.label}_hist.png",
-    #     )
+    for ds in datasets_w_score:
+        charts.write_histogram_pair(
+            ds.label,
+            ds.getScores(),
+            args.topn,
+            f"{args.outdir}/{ds.label}_hist.png",
+        )
 
-    # heatmap.write_heatmaps(datasets_w_score, args.outdir, args.topn)
+    heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
 
     print(datasets_w_score)
     if len(datasets_w_score) > 0:

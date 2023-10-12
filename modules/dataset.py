@@ -2,6 +2,7 @@ from pysam import VariantFile, VariantHeader
 
 
 class Variant:
+    key: str
     contig: str
     pos: int
     ref: str | None

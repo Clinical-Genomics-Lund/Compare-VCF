@@ -7,18 +7,31 @@ TopKeysPerDs = dict[str, set[str]]
 def write_score_table(
     datasets: list[Dataset], top_n: int, outpath: str, rankmodels: list[str] | None
 ):
-    datasets_w_scores = [ds for ds in datasets if ds.hasScores()]
-
-    (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets_w_scores, top_n)
+    (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets, top_n)
     variant_key = "key"
     top_df = build_data_frame(
-        datasets_w_scores, all_top_keys, top_keys_per_ds, top_n, variant_key
+        datasets, all_top_keys, top_keys_per_ds, top_n, variant_key
     )
 
-    print(top_df)
     # Pull out the ranks strings and add to the top_df
-    for key in top_df[variant_key]:
-        print(f"Finding {key}")
+
+    for ds in datasets:
+        rank_result_strings = list()
+        for key in top_df[variant_key]:
+            print(f"Finding {key}")
+            variant = ds.getVariantByKey(key)
+            if variant is None:
+                rank_result_strings.append(None)
+                continue
+
+            rank_result_strs = variant.info.get("RankResult")
+
+            if rank_result_strs is not None:
+                rank_result_str = rank_result_strs[0]
+                rank_result_strings.append(rank_result_str)
+            else:
+                rank_result_strings.append(None)
+        top_df[f"{ds.label}_rank_string"] = rank_result_strings
 
     top_df.to_csv(outpath, sep="\t", index=False)
 

@@ -23,7 +23,7 @@ def parse_arguments():
         type=int,
     )
     parser.add_argument(
-        "--scorekey", default=None, help="Study scoring present in INFO field"
+        "--scorekey", default="RankScore", help="Study scoring present in INFO field"
     )
     parser.add_argument(
         "--annotations", help="Study scoring present in INFO field", action="store_true"

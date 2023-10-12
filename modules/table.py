@@ -13,15 +13,19 @@ def write_score_table(
         datasets, all_top_keys, top_keys_per_ds, top_n, variant_key
     )
 
-    # Pull out the ranks strings and add to the top_df
-
+    # FIXME: Cleanup in this part
+    # Some function extraction
+    # Some simplification
     for ds in datasets:
         rank_result_strings = list()
-        for key in top_df[variant_key]:
+        rank_result_dicts = list()
+        for key in top_df.index:
             print(f"Finding {key}")
             variant = ds.getVariantByKey(key)
+            single_rank_result_dict = {"key": key}
             if variant is None:
                 rank_result_strings.append(None)
+                rank_result_dicts.append(single_rank_result_dict)
                 continue
 
             rank_result_strs = variant.info.get("RankResult")
@@ -29,9 +33,23 @@ def write_score_table(
             if rank_result_strs is not None:
                 rank_result_str = rank_result_strs[0]
                 rank_result_strings.append(rank_result_str)
+
+                values = [int(val) for val in rank_result_str.split("|")]
+                for i, val in enumerate(values):
+                    single_rank_result_dict[f"{ds.label}_{i}"] = val
+                rank_result_dicts.append(single_rank_result_dict)
             else:
                 rank_result_strings.append(None)
+                rank_result_dicts.append(single_rank_result_dict)
+
+        # rank_result_values.append(single_rank_result_dict)
+
+        dfs = [pd.DataFrame(d, index=[0]) for d in rank_result_dicts]
+        comb = pd.concat(dfs)
+        comb.set_index(variant_key, inplace=True)
+
         top_df[f"{ds.label}_rank_string"] = rank_result_strings
+        top_df = pd.concat([top_df, comb], axis=1)
 
     top_df.to_csv(outpath, sep="\t", index=False)
 
@@ -41,10 +59,10 @@ def build_data_frame(
     all_top_keys: set[str],
     top_keys_per_ds: TopKeysPerDs,
     top_n: int,
-    key: str,
+    variant_key: str,
 ) -> pd.DataFrame:
     table_dict: dict[str, list[bool | int | str]] = dict()
-    table_dict[key] = list(all_top_keys)
+    table_dict[variant_key] = list(all_top_keys)
     for ds in datasets:
         ds_top_keys = top_keys_per_ds[ds.label]
         ds_cols = get_dataset_columns(ds, all_top_keys, ds_top_keys, top_n)
@@ -58,6 +76,7 @@ def build_data_frame(
     top_df = pd.DataFrame(table_dict)
     score_labels = [f"{ds.label}_score" for ds in datasets]
     top_df.sort_values(by=score_labels, inplace=True, ascending=False)
+    top_df.set_index(variant_key, inplace=True)
     return top_df
 
 

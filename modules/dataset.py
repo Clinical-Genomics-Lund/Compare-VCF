@@ -5,7 +5,7 @@ class Variant:
     contig: str
     pos: int
     ref: str | None
-    alt: tuple[str] | None
+    alt: tuple[str, ...] | None
     score: int | None
     info: dict[str, tuple[str]]
     header: VariantHeader
@@ -51,9 +51,9 @@ class Variant:
         contig: str,
         pos: int,
         ref: str | None,
-        alt: tuple[str] | None,
+        alt: tuple[str, ...] | None,
         rankScore: int | None,
-        info: dict[str, str | int | bool | list],
+        info: dict[str, tuple[str]],
         header: VariantHeader,
     ):
         self.contig = contig
@@ -69,22 +69,22 @@ class Dataset:
     __fh: VariantFile
     _variantDict: dict[str, Variant]
     _filepath: str
-    _rankScores: list[int]
+    _scores: list[int]
     label: str
     variants: list[Variant]
 
     def __init__(self, label, filename):
         self.label = label
         self._filepath = filename
-        self._rankScores = list()
+        self._scores = list()
         self.variants = list()
         self._variantDict = dict()
 
     def hasScores(self) -> bool:
-        return len(self._rankScores) > 0
+        return len(self._scores) > 0
 
     def getScores(self) -> list[int]:
-        return self._rankScores
+        return self._scores
 
     def getVariantByKey(self, key: str) -> Variant | None:
         return self._variantDict.get(key)
@@ -121,13 +121,13 @@ class Dataset:
             if score_key is not None and has_rank_score:
                 rank_score_cell = record.info.get(score_key)
                 rank_score = int(rank_score_cell[0].split(":")[-1])
-                self._rankScores.append(rank_score)
+                self._scores.append(rank_score)
 
             variant = Variant(
                 record.contig,
                 record.pos,
                 record.ref,
-                tuple(record.alts),
+                record.alts,
                 rank_score,
                 {item[0]: item[1] for item in record.info.items()},
                 record.header,

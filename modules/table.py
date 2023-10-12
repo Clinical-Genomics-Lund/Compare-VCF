@@ -4,11 +4,22 @@ import pandas as pd
 TopKeysPerDs = dict[str, set[str]]
 
 
-def write_score_table(datasets: list[Dataset], top_n: int, outpath: str):
+def write_score_table(
+    datasets: list[Dataset], top_n: int, outpath: str, rankmodels: list[str] | None
+):
     datasets_w_scores = [ds for ds in datasets if ds.hasScores()]
 
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets_w_scores, top_n)
-    top_df = build_data_frame(datasets_w_scores, all_top_keys, top_keys_per_ds, top_n)
+    variant_key = "key"
+    top_df = build_data_frame(
+        datasets_w_scores, all_top_keys, top_keys_per_ds, top_n, variant_key
+    )
+
+    print(top_df)
+    # Pull out the ranks strings and add to the top_df
+    for key in top_df[variant_key]:
+        print(f"Finding {key}")
+
     top_df.to_csv(outpath, sep="\t", index=False)
 
 
@@ -17,9 +28,10 @@ def build_data_frame(
     all_top_keys: set[str],
     top_keys_per_ds: TopKeysPerDs,
     top_n: int,
+    key: str,
 ) -> pd.DataFrame:
     table_dict: dict[str, list[bool | int | str]] = dict()
-    table_dict["key"] = list(all_top_keys)
+    table_dict[key] = list(all_top_keys)
     for ds in datasets:
         ds_top_keys = top_keys_per_ds[ds.label]
         ds_cols = get_dataset_columns(ds, all_top_keys, ds_top_keys, top_n)

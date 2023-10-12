@@ -29,5 +29,20 @@ def parse_arguments():
         "--annotations", help="Study scoring present in INFO field", action="store_true"
     )
 
+    parser.add_argument(
+        "--rankmodels",
+        help="Optionally provide rank models corresponding to the provided inputs",
+        nargs="+",
+    )
+
     args = parser.parse_args()
+    validate_inputs(args)
     return args
+
+
+def validate_inputs(args):
+    if args.rankmodels is not None:
+        if len(args.rankmodels) != len(args.inputs):
+            raise ValueError(
+                f"Number of rankmodels must either be zero, or match the number of inputs, found {len(args.rankmodels)} rankmodels and {len(args.inputs)} inputs"
+            )

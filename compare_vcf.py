@@ -15,10 +15,10 @@ def main():
     args = parse_arguments()
     labels = get_labels(args)
     datasets = setup_datasets(args.inputs, labels, args.scorekey, args.contig)
-    # datasets_w_score = [ds for ds in datasets if ds.hasScores()]
-    # variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
+    datasets_w_score = [ds for ds in datasets if ds.hasScores()]
+    variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
+    os.makedirs(args.outdir, exist_ok=True)
 
-    # os.makedirs(args.outdir, exist_ok=True)
     # charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
     # charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
 
@@ -31,7 +31,13 @@ def main():
     #     )
 
     # heatmap.write_heatmaps(datasets_w_score, args.outdir, args.topn)
-    # table.write_score_table(datasets_w_score, args.topn, f"{args.outdir}/table.tsv")
+
+    print(datasets_w_score)
+    if len(datasets_w_score) > 0:
+        print("Table branch")
+        table.write_score_table(
+            datasets_w_score, args.topn, f"{args.outdir}/table.tsv", args.rankmodels
+        )
 
     if args.annotations:
         annotations.write_annotations_table(datasets, f"{args.outdir}/annotations.tsv")

@@ -23,9 +23,14 @@ def write_score_table(
     )
 
     if rankmodel_paths is not None:
+        non_empty_rankmodels = [path for path in rankmodel_paths if path != ""]
+        if len(non_empty_rankmodels) != len(datasets):
+            raise ValueError(
+                f"After filtering, number of rankmodel paths and scored datasets differ. Found {len(non_empty_rankmodels)} rank models and {len(datasets)} datasets"
+            )
         for i, ds in enumerate(datasets):
             ds_rank_results = get_rank_result_df(
-                ds, rankmodel_paths[i], variant_column, list(top_df.index)
+                ds, non_empty_rankmodels[i], variant_column, list(top_df.index)
             )
 
             top_df = pd.concat([top_df, ds_rank_results], axis=1)

@@ -44,5 +44,11 @@ def validate_inputs(args):
     if args.rankmodels is not None:
         if len(args.rankmodels) != len(args.inputs):
             raise ValueError(
-                f"Number of rankmodels must either be zero, or match the number of inputs, found {len(args.rankmodels)} rankmodels and {len(args.inputs)} inputs"
+                f'Number of rankmodels must either be zero, or match the number of inputs, found {len(args.rankmodels)} rankmodels and {len(args.inputs)} inputs. Provide an empty string ("") if you want to compare a dataset without rank model'
+            )
+
+    if args.labels is not None:
+        if len(args.labels) != len(args.inputs):
+            raise ValueError(
+                f"Number of labels must either be zero, or match the number of inputs, found {len(args.labels)} labels and {len(args.inputs)} inputs."
             )

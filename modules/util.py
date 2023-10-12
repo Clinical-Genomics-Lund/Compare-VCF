@@ -36,9 +36,8 @@ def get_scores_for_shared_variants(
     return shared_scores
 
 
-def get_rankscore_categories(rankmodel_path: str) -> list[str]:
+def get_rankscore_categories(rankmodel_path: str, categories_key: str) -> list[str]:
     config = ConfigObj(rankmodel_path)
-    categories_section = config["Categories"]
+    categories_section = config[categories_key]
     categories_keys = categories_section.keys()  # type: ignore
-    print(categories_keys)
     return categories_keys

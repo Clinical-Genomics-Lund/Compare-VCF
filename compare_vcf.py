@@ -32,11 +32,12 @@ def main():
 
     heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
 
-    print(datasets_w_score)
     if len(datasets_w_score) > 0:
-        print("Table branch")
         table.write_score_table(
-            datasets_w_score, args.topn, f"{args.outdir}/table.tsv", args.rankmodels
+            datasets_w_score,
+            args.topn,
+            f"{args.outdir}/rank_table_top{args.topn}.tsv",
+            args.rankmodels,
         )
 
     if args.annotations:

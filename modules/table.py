@@ -7,66 +7,74 @@ import modules.util as util
 TopKeysPerDs = dict[str, set[str]]
 
 
+RANK_RESULT = "RankResult"
+CATEGORIES_KEY = "Categories"
+
+
 def write_score_table(
     datasets: list[Dataset], top_n: int, outpath: str, rankmodel_paths: list[str] | None
 ):
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets, top_n)
-    variant_key = "key"
+    variant_column = "key"
     top_df = build_data_frame(
-        datasets, all_top_keys, top_keys_per_ds, top_n, variant_key
+        datasets, all_top_keys, top_keys_per_ds, top_n, variant_column
     )
 
-    # # FIXME: Refactor
-    # if rankmodel_paths is not None:
-    #     config = ConfigObj(rankmodel_paths[0])
-    #     categories_section = config["Categories"]
-    #     categories_keys = categories_section.keys()  # type: ignore
-    #     print(categories_keys)
+    if rankmodel_paths is not None:
+        for i, ds in enumerate(datasets):
+            ds_rank_results = get_rank_result_df(
+                ds, rankmodel_paths[i], variant_column, list(top_df.index)
+            )
 
-    # FIXME: Cleanup in this part
-    # Some function extraction
-    # Some simplification
-    for i, ds in enumerate(datasets):
-        rank_result_strings = list()
-        rank_result_dicts = list()
-
-        # FIXME: Handle that this isn't always present
-        rankscore_categories = util.get_rankscore_categories(rankmodel_paths[i])
-
-        for key in top_df.index:
-            variant = ds.getVariantByKey(key)
-            single_rank_result_dict = {"key": key}
-            if variant is None:
-                rank_result_strings.append(None)
-                rank_result_dicts.append(single_rank_result_dict)
-                continue
-
-            rank_result_strs = variant.info.get("RankResult")
-
-            if rank_result_strs is not None:
-                rank_result_str = rank_result_strs[0]
-                rank_result_strings.append(rank_result_str)
-
-                values = [int(val) for val in rank_result_str.split("|")]
-                for i, val in enumerate(values):
-                    single_rank_result_dict[
-                        f"{ds.label}_{rankscore_categories[i]}"
-                    ] = val
-                rank_result_dicts.append(single_rank_result_dict)
-            else:
-                rank_result_strings.append(None)
-                rank_result_dicts.append(single_rank_result_dict)
-
-        # rank_result_values.append(single_rank_result_dict)
-
-        dfs = [pd.DataFrame(d, index=[0]) for d in rank_result_dicts]
-        comb = pd.concat(dfs)
-        comb.set_index(variant_key, inplace=True)
-
-        top_df[f"{ds.label}_rank_string"] = rank_result_strings
-        top_df = pd.concat([top_df, comb], axis=1)
+            top_df = pd.concat([top_df, ds_rank_results], axis=1)
 
     top_df.to_csv(outpath, sep="\t", index=False)
+
+
+def get_rank_result_df(
+    dataset: Dataset,
+    rankmodel_path: str,
+    variant_column: str,
+    top_df_variant_keys: list[str],
+) -> pd.DataFrame:
+    rankscore_categories = util.get_rankscore_categories(rankmodel_path, CATEGORIES_KEY)
+    rank_result_dicts = list()
+    for variant_key in top_df_variant_keys:
+        variant = dataset.getVariantByKey(variant_key)
+
+        if variant is None:
+            rank_result_dicts.append({variant_column: variant_key})
+            continue
+
+        variant_ranks_dict = get_variant_rank_categories_values(
+            dataset.label, variant, rankscore_categories
+        )
+        variant_ranks_dict[variant_column] = variant_key  # type: ignore
+        rank_result_dicts.append(variant_ranks_dict)
+
+    dfs = [pd.DataFrame(d, index=[0]) for d in rank_result_dicts]
+    comb = pd.concat(dfs)
+    comb.set_index(variant_column, inplace=True)
+    return comb
+
+
+def get_variant_rank_categories_values(
+    ds_label: str, variant: Variant, rankscore_categories: list[str]
+) -> dict[str, int]:
+    single_rank_result_dict = dict()
+
+    if variant is None:
+        return single_rank_result_dict
+
+    rank_result_strs = variant.info.get(RANK_RESULT)
+
+    if rank_result_strs is not None:
+        rank_result_str = rank_result_strs[0]
+
+        values = [int(val) for val in rank_result_str.split("|")]
+        for i, val in enumerate(values):
+            single_rank_result_dict[f"{ds_label}_{rankscore_categories[i]}"] = val
+    return single_rank_result_dict
 
 
 def build_data_frame(

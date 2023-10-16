@@ -1,12 +1,11 @@
 import warnings
 import os
 
+from classes.rankmodel import RankModel
+from classes.vcf import VCF
+from subcommands.overview import overview_command
+from subcommands.rankmodels import rankmodels_command
 from modules.argparse import parse_arguments
-import modules.charts as charts
-import modules.heatmap as heatmap
-import modules.ranktable as ranktable
-import modules.annotations as annotations
-from modules.dataset import Dataset
 
 # Upset chart library emits various warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -20,41 +19,19 @@ def main():
     os.makedirs(args.outdir, exist_ok=True)
 
     if args.subcommand == "overview":
-        for ds in datasets:
-            ds.parse(None, args.contig)
-        variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
-        charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
-        charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
-        if args.annotations:
-            annotations.write_annotations_table(
-                datasets, f"{args.outdir}/annotations.tsv"
-            )
+        overview_command(datasets, args.contig, args.outdir)
 
-    elif args.subcommand == "rankscores":
-        for ds in datasets:
-            ds.parse(args.scorekey, args.contig)
-        datasets_w_score = [ds for ds in datasets if ds.hasScores()]
-        for ds in datasets_w_score:
-            charts.write_histogram_pair(
-                ds.label,
-                ds.getScores(),
-                args.topn,
-                f"{args.outdir}/{ds.label}_hist.png",
-            )
+    elif args.subcommand == "rankmodels":
+        if args.rankmodels is not None:
+            rankmodels = [RankModel(path) for path in args.rankmodels]
+        else:
+            rankmodels = []
 
-        heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
-
-        if len(datasets_w_score) > 0:
-            ranktable.write_score_table(
-                datasets_w_score,
-                args.topn,
-                f"{args.outdir}/rank_table_top{args.topn}.tsv",
-                args.rankmodels,
-            )
+        rankmodels_command(datasets, args.contig, args.outdir, args.topn, rankmodels)
 
     else:
         # FIXME: Programatically calculate
-        raise ValueError("Invalid subcommand, valid are: overview, rankscores")
+        raise ValueError("Invalid subcommand, valid are: overview, rankmodels")
 
 
 def get_labels(args) -> list[str]:
@@ -69,14 +46,13 @@ def get_labels(args) -> list[str]:
 def setup_datasets(
     input_paths: list[str],
     labels: list[str],
-) -> list[Dataset]:
+) -> list[VCF]:
     datasets = list()
     for i in range(len(input_paths)):
         label = labels[i]
         vcf_fp = input_paths[i]
-        dataset = Dataset(label, vcf_fp)
-        # dataset.parse(score_key, contig)
-        datasets.append(dataset)
+        vcf = VCF(label, vcf_fp)
+        datasets.append(vcf)
     return datasets
 
 

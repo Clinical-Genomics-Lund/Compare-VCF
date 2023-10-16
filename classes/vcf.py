@@ -1,5 +1,4 @@
 from pysam import VariantFile, VariantHeader
-from logging import debug
 
 
 class Variant:
@@ -67,7 +66,7 @@ class Variant:
         self.header = header
 
 
-class Dataset:
+class VCF:
     __fh: VariantFile
     _variantDict: dict[str, Variant]
     _filepath: str

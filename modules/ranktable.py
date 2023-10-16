@@ -1,6 +1,7 @@
 import pandas as pd
 
-from modules.dataset import Dataset, Variant
+from classes.vcf import VCF, Variant
+from classes.rankmodel import RankModel
 import modules.util as util
 
 
@@ -10,11 +11,10 @@ TopKeysPerDs = dict[str, set[str]]
 
 # Constants
 RANK_RESULT = "RankResult"
-CATEGORIES_KEY = "Categories"
 
 
 def write_score_table(
-    datasets: list[Dataset], top_n: int, outpath: str, rankmodel_paths: list[str] | None
+    datasets: list[VCF], top_n: int, outpath: str, rank_models: list[RankModel] | None
 ):
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(datasets, top_n)
     variant_column = "key"
@@ -22,15 +22,11 @@ def write_score_table(
         datasets, all_top_keys, top_keys_per_ds, top_n, variant_column
     )
 
-    if rankmodel_paths is not None:
-        non_empty_rankmodels = [path for path in rankmodel_paths if path != ""]
-        if len(non_empty_rankmodels) != len(datasets):
-            raise ValueError(
-                f"After filtering, number of rankmodel paths and scored datasets differ. Found {len(non_empty_rankmodels)} rank models and {len(datasets)} datasets"
-            )
+    if rank_models is not None:
+        # non_empty_rankmodels = [path for path in rankmodel_paths if path != ""]
         for i, ds in enumerate(datasets):
             ds_rank_results = get_rank_result_df(
-                ds, non_empty_rankmodels[i], variant_column, list(top_df.index)
+                ds, rank_models[i], variant_column, list(top_df.index)
             )
 
             top_df = pd.concat([top_df, ds_rank_results], axis=1)
@@ -39,12 +35,11 @@ def write_score_table(
 
 
 def get_rank_result_df(
-    dataset: Dataset,
-    rankmodel_path: str,
+    dataset: VCF,
+    rank_model: RankModel,
     variant_column: str,
     top_df_variant_keys: list[str],
 ) -> pd.DataFrame:
-    rankscore_categories = util.get_rankscore_categories(rankmodel_path, CATEGORIES_KEY)
     rank_result_dicts = list()
     for variant_key in top_df_variant_keys:
         variant = dataset.getVariantByKey(variant_key)
@@ -54,7 +49,7 @@ def get_rank_result_df(
             continue
 
         variant_ranks_dict = get_variant_rank_categories_values(
-            dataset.label, variant, rankscore_categories
+            dataset.label, variant, rank_model.categories
         )
         variant_ranks_dict[variant_column] = variant_key  # type: ignore
         rank_result_dicts.append(variant_ranks_dict)
@@ -85,7 +80,7 @@ def get_variant_rank_categories_values(
 
 
 def build_data_frame(
-    datasets: list[Dataset],
+    datasets: list[VCF],
     all_top_keys: set[str],
     top_keys_per_ds: TopKeysPerDs,
     top_n: int,
@@ -111,7 +106,7 @@ def build_data_frame(
 
 
 def get_dataset_columns(
-    ds: Dataset, all_top_keys: set[str], ds_top_keys: set[str], top_n: int
+    ds: VCF, all_top_keys: set[str], ds_top_keys: set[str], top_n: int
 ) -> dict[str, list[bool | int | str]]:
     col_dict = dict()
     # FIXME: Avoid hard-coding, lift this up from this function
@@ -127,7 +122,7 @@ def get_dataset_columns(
 
 
 def get_top_scored_keys(
-    datasets: list[Dataset], top_n: int
+    datasets: list[VCF], top_n: int
 ) -> tuple[set[str], TopKeysPerDs]:
     all_top_keys = set()
     top_keys_per_ds: dict[str, set[str]] = dict()

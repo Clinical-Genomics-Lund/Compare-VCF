@@ -1,4 +1,4 @@
-from modules.dataset import Dataset
+from classes.vcf import VCF
 import modules.util as util
 import numpy as np
 import pandas as pd
@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from scipy.stats import spearmanr
 
 
-def write_freq_heatmaps(datasets: list[Dataset], outdir: str, top_n: int):
+def write_freq_heatmaps(datasets: list[VCF], outdir: str, top_n: int):
     nbr_datasets = len(datasets)
     if nbr_datasets >= 2:
         for i in range(nbr_datasets):
@@ -20,7 +20,7 @@ def write_freq_heatmaps(datasets: list[Dataset], outdir: str, top_n: int):
 
 
 def write_heatmap_from_datasets(
-    ds1: Dataset, ds2: Dataset, outdir: str, top_n: int | None, top_from: str = "first"
+    ds1: VCF, ds2: VCF, outdir: str, top_n: int | None, top_from: str = "first"
 ):
     shared_scores = util.get_scores_for_shared_variants(ds1, ds2, top_n, top_from)
     shared_scores_ds1 = [shared_score[1] for shared_score in shared_scores]
@@ -63,7 +63,7 @@ def write_heatmap(
         alpha=1,
     )
     ax.set(
-        title=f"{xLabel} vs {yLabel} (corr: {round(corr_coef[0][1], 2)})",
+        title=f"{xLabel} vs {yLabel} (corr: {round(corr_coef, 2)})",
         xlabel=xLabel,
         ylabel=yLabel,
     )

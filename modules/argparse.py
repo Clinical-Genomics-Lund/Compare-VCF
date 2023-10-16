@@ -58,7 +58,6 @@ def add_rank_model_parser(subparsers):
         help="Limit number of features included as 'top features'",
         type=int,
     )
-    parser.add_argument("--scorekey", default="RankScore", help="Default score key")
     parser.add_argument(
         "--contig",
         default=None,

@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
+from scipy.stats import spearmanr
 
 
 def write_freq_heatmaps(datasets: list[Dataset], outdir: str, top_n: int):
@@ -50,7 +51,7 @@ def write_heatmap(
         raise ValueError(
             f"Length of value arrays expected to be the same, found {len(scores_ds1)} and {len(scores_ds2)}"
         )
-    corr_coef = np.corrcoef(scores_ds1, scores_ds2)
+    corr_coef = spearmanr(scores_ds1, scores_ds2).statistic
 
     df = pd.DataFrame({"dataset1": scores_ds1, "dataset2": scores_ds2})
     ax = sns.displot(

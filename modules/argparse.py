@@ -35,6 +35,10 @@ def parse_arguments():
         nargs="+",
     )
 
+    subparsers = parser.add_subparsers(help="For rank models")
+    rank_model_parser = subparsers.add_parser('rankmodels')
+    rank_model_parser.add_argument('--scorekey', default='RankScore', help='Default score key')
+
     args = parser.parse_args()
     validate_inputs(args)
     return args

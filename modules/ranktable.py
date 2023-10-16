@@ -26,9 +26,8 @@ def write_score_table(
             rank_categories_df = get_rank_categories_scores(
                 vcf, rank_models[i], variant_column, list(top_df.index)
             )
-            rank_categories_df.columns = [
-                f"{vcf.label}_{col}" for col in rank_categories_df
-            ]
+            new_columns = [f"{vcf.label}_{col}" for col in rank_categories_df]
+            rank_categories_df.columns = new_columns
 
             top_df = pd.concat([top_df, rank_categories_df], axis=1)
 

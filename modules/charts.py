@@ -84,10 +84,11 @@ def write_histograms(
     values_df: pd.DataFrame,
     outpath: str,
     title: str = "",
-    figsize: tup[int, int] = (15, 15),
+    figsize: tuple[int, int] = (15, 15),
+    nbr_columns: int = 4,
 ):
-    nbr_rows = len(values_df) // 4 + 1
-    fig, axes = plt.subplots(nbr_rows, 4, figsize=figsize)
+    nbr_rows = len(values_df.columns) // nbr_columns + 1
+    fig, axes = plt.subplots(nbr_rows, nbr_columns, figsize=figsize)
     ax = axes.flatten()
 
     for i, col in enumerate(values_df.columns):

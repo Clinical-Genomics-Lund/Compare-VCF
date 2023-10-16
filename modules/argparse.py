@@ -7,8 +7,11 @@ def parse_arguments():
     )
 
     subparsers = parent_parser.add_subparsers(
-        help="Analyze rank models and their scores across VCF files", dest="command", required=True
+        help="Analyze rank models and their scores across VCF files",
+        dest="subcommand",
+        required=True,
     )
+    add_overview_parser(subparsers)
     add_rank_model_parser(subparsers)
 
     args = parent_parser.parse_args()
@@ -16,6 +19,7 @@ def parse_arguments():
 
 
 def add_overview_parser(subparsers):
+    parser = subparsers.add_parser("overview")
     parser = subparsers.add_parser("overview")
     parser.add_argument(
         "-i", "--inputs", required=True, help="Input VCF files", nargs="+"

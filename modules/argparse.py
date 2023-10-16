@@ -1,4 +1,5 @@
 import argparse
+import os
 
 
 def parse_arguments():
@@ -15,6 +16,9 @@ def parse_arguments():
     add_rank_model_parser(subparsers)
 
     args = parent_parser.parse_args()
+
+    validate_inputs(args)
+
     return args
 
 
@@ -62,15 +66,19 @@ def add_rank_model_parser(subparsers):
     )
 
 
-# def validate_inputs(args):
-#     if args.rankmodels is not None:
-#         if len(args.rankmodels) != len(args.inputs):
-#             raise ValueError(
-#                 f'Number of rankmodels must either be zero, or match the number of inputs, found {len(args.rankmodels)} rankmodels and {len(args.inputs)} inputs. Provide an empty string ("") if you want to compare a dataset without rank model'
-#             )
+def validate_inputs(args):
+    if args.rankmodels is not None:
+        if len(args.rankmodels) != len(args.inputs):
+            raise ValueError(
+                f'Number of rankmodels must either be zero, or match the number of inputs, found {len(args.rankmodels)} rankmodels and {len(args.inputs)} inputs. Provide an empty string ("") if you want to compare a dataset without rank model'
+            )
 
-#     if args.labels is not None:
-#         if len(args.labels) != len(args.inputs):
-#             raise ValueError(
-#                 f"Number of labels must either be zero, or match the number of inputs, found {len(args.labels)} labels and {len(args.inputs)} inputs."
-#             )
+    if args.labels is not None:
+        if len(args.labels) != len(args.inputs):
+            raise ValueError(
+                f"Number of labels must either be zero, or match the number of inputs, found {len(args.labels)} labels and {len(args.inputs)} inputs."
+            )
+
+    for input_fp in args.inputs:
+        if not os.path.isfile(input_fp):
+            raise ValueError(f"There is no file in {input_fp}")

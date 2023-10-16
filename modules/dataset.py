@@ -1,4 +1,5 @@
 from pysam import VariantFile, VariantHeader
+from logging import debug
 
 
 class Variant:

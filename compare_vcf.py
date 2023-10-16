@@ -14,35 +14,39 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 def main():
     args = parse_arguments()
-    labels = get_labels(args)
-    datasets = setup_datasets(args.inputs, labels, args.scorekey, args.contig)
-    datasets_w_score = [ds for ds in datasets if ds.hasScores()]
-    variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
-    os.makedirs(args.outdir, exist_ok=True)
 
-    charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
-    charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
+    print("In main!")
+    print(args.command)
 
-    for ds in datasets_w_score:
-        charts.write_histogram_pair(
-            ds.label,
-            ds.getScores(),
-            args.topn,
-            f"{args.outdir}/{ds.label}_hist.png",
-        )
+    # labels = get_labels(args)
+    # datasets = setup_datasets(args.inputs, labels, args.scorekey, args.contig)
+    # datasets_w_score = [ds for ds in datasets if ds.hasScores()]
+    # variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in datasets}
+    # os.makedirs(args.outdir, exist_ok=True)
 
-    heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
+    # charts.write_count_bars(variant_keys_per_ds, f"{args.outdir}/total_counts.png")
+    # charts.write_count_upset(variant_keys_per_ds, f"{args.outdir}/overlaps.png")
 
-    if len(datasets_w_score) > 0:
-        ranktable.write_score_table(
-            datasets_w_score,
-            args.topn,
-            f"{args.outdir}/rank_table_top{args.topn}.tsv",
-            args.rankmodels,
-        )
+    # for ds in datasets_w_score:
+    #     charts.write_histogram_pair(
+    #         ds.label,
+    #         ds.getScores(),
+    #         args.topn,
+    #         f"{args.outdir}/{ds.label}_hist.png",
+    #     )
 
-    if args.annotations:
-        annotations.write_annotations_table(datasets, f"{args.outdir}/annotations.tsv")
+    # heatmap.write_freq_heatmaps(datasets_w_score, args.outdir, args.topn)
+
+    # if len(datasets_w_score) > 0:
+    #     ranktable.write_score_table(
+    #         datasets_w_score,
+    #         args.topn,
+    #         f"{args.outdir}/rank_table_top{args.topn}.tsv",
+    #         args.rankmodels,
+    #     )
+
+    # if args.annotations:
+    #     annotations.write_annotations_table(datasets, f"{args.outdir}/annotations.tsv")
 
 
 def get_labels(args) -> list[str]:

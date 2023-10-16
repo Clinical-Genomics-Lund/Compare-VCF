@@ -80,3 +80,23 @@ def show_histogram(
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 
 
+def write_histograms(
+    values_df: pd.DataFrame,
+    outpath: str,
+    title: str = "",
+    figsize: tup[int, int] = (15, 15),
+):
+    nbr_rows = len(values_df) // 4 + 1
+    fig, axes = plt.subplots(nbr_rows, 4, figsize=figsize)
+    ax = axes.flatten()
+
+    for i, col in enumerate(values_df.columns):
+        sns.histplot(values_df[col], ax=ax[i])
+        # ax[i].set_title(col)
+
+    if title != "":
+        fig.suptitle(title)
+    fig.tight_layout()
+
+    plt.savefig(outpath)
+    plt.close()

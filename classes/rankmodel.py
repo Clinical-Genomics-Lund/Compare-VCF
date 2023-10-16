@@ -12,8 +12,3 @@ class RankModel:
         self.categories = categories_section.keys()  # type: ignore
 
 
-# def get_rankscore_categories(rank_model: RankModel, categories_key: str) -> list[str]:
-#     # config = ConfigObj(rankmodel_path)
-#     # categories_section = config[categories_key]
-#     categories_keys = categories_section.keys()  # type: ignore
-#     return categories_keys

@@ -14,12 +14,11 @@ def rankmodels_command(
     contig: str | None,
     outdir: str,
     topn: int,
-    rankmodels: list[RankModel],
+    rank_models: list[RankModel],
 ):
     for vcf in vcfs:
         vcf.parse(SCOREKEY, contig)
-    datasets_w_score = [ds for ds in vcfs if ds.hasScores()]
-    for vcf in datasets_w_score:
+    for vcf in vcfs:
         charts.write_histogram_pair(
             vcf.label,
             vcf.getScores(),
@@ -27,12 +26,23 @@ def rankmodels_command(
             f"{outdir}/{vcf.label}_hist.png",
         )
 
-    heatmap.write_freq_heatmaps(datasets_w_score, outdir, topn)
+    heatmap.write_freq_heatmaps(vcfs, outdir, topn)
+    ranktable.write_score_table(
+        vcfs,
+        topn,
+        f"{outdir}/rank_table_top{topn}.tsv",
+        rank_models,
+    )
 
-    if len(datasets_w_score) > 0:
-        ranktable.write_score_table(
-            datasets_w_score,
-            topn,
-            f"{outdir}/rank_table_top{topn}.tsv",
-            rankmodels,
-        )
+    # FIXME: Distribution histograms
+    if rank_models is not None:
+        for i, vcf in enumerate(vcfs):
+            key_col_name = "key"
+            scores_df = ranktable.get_rank_categories_scores(
+                vcf, rank_models[i], key_col_name, None
+            )
+            charts.write_histograms(
+                scores_df, f"{outdir}/{vcf.label}_rank_histograms.png", vcf.label
+            )
+
+    # FIXME: Correlation scores matrix

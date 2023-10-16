@@ -5,43 +5,52 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Evaluate and compare set of VCF files"
     )
+
+    parser.add_argument("-o", "--outdir", help="Output folder")
     parser.add_argument(
         "-i", "--inputs", required=True, help="Input VCF files", nargs="+"
     )
-    parser.add_argument("-l", "--labels", help="Label input VCFs", nargs="+")
-    parser.add_argument("-b", "--baseline", help="Reference VCF (for instance GIAB)")
-    parser.add_argument("-o", "--outdir", required=True, help="Output folder")
     parser.add_argument(
         "--contig",
         default=None,
         help="Limit analysis to one contig",
     )
+    parser.add_argument("-l", "--labels", help="Label input VCFs", nargs="+")
     parser.add_argument(
+        "--annotations", help="Study scoring present in INFO field", action="store_true"
+    )
+
+    subparsers = parser.add_subparsers(help="Analyze rank models and their scores across VCF files")
+    add_rank_model_parser(subparsers)
+
+    args = parser.parse_args()
+    validate_inputs(args)
+    return args
+
+
+def add_rank_model_parser(subparsers):
+    rank_model_parser = subparsers.add_parser('rankmodels')
+    rank_model_parser.add_argument('--scorekey', default='RankScore', help='Default score key')
+    rank_model_parser.add_argument(
+        "-i", "--inputs", required=True, help="Input VCF files", nargs="+"
+    )
+    rank_model_parser.add_argument("-l", "--labels", help="Label input VCFs", nargs="+")
+    rank_model_parser.add_argument(
+        "--rankmodels",
+        help="Optionally provide rank models corresponding to the provided inputs",
+        nargs="+",
+    )
+    rank_model_parser.add_argument(
         "--topn",
         default=20,
         help="Limit number of features included as 'top features'",
         type=int,
     )
-    parser.add_argument(
-        "--scorekey", default="RankScore", help="Study scoring present in INFO field"
+    rank_model_parser.add_argument(
+        "--contig",
+        default=None,
+        help="Limit analysis to one contig",
     )
-    parser.add_argument(
-        "--annotations", help="Study scoring present in INFO field", action="store_true"
-    )
-
-    parser.add_argument(
-        "--rankmodels",
-        help="Optionally provide rank models corresponding to the provided inputs",
-        nargs="+",
-    )
-
-    subparsers = parser.add_subparsers(help="For rank models")
-    rank_model_parser = subparsers.add_parser('rankmodels')
-    rank_model_parser.add_argument('--scorekey', default='RankScore', help='Default score key')
-
-    args = parser.parse_args()
-    validate_inputs(args)
-    return args
 
 
 def validate_inputs(args):

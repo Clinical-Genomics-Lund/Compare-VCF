@@ -15,7 +15,7 @@ pip install -r requirements.txt
 Inputs can be gzipped:
 
 ```
-python evaluate.py \
+python compare_vcf.py \
     --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
     --labels first second third \
     --outdir testout
@@ -24,7 +24,7 @@ python evaluate.py \
 Extended command:
 
 ```
-python evaluate.py \
+python compare_vcf.py \
     --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
     --labels first second third \
     --outdir testout \

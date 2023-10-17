@@ -3,6 +3,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
+import statistics
+
+from classes.vcf import VCF
 
 
 def write_count_bars(variant_per_dataset: dict[str, set[str]], outpath: str) -> None:
@@ -100,4 +103,28 @@ def write_histograms(
     fig.tight_layout()
 
     plt.savefig(outpath)
+    plt.close()
+
+
+def write_quality_histograms(
+    vcfs: list[VCF],
+    outpath: str,
+    figsize: tuple[int, int] = (15, 15),
+    nbr_columns: int = 3,
+):
+    nbr_rows = len(vcfs) // nbr_columns + 1
+    _fig, axes = plt.subplots(nbr_rows, nbr_columns, figsize=figsize)
+    ax_arr = axes.flatten()
+    for i, vcf in enumerate(vcfs):
+        (quals, nbr_missing) = vcf.getQualities()
+
+        # plt.hist(quals)
+        sns.histplot(quals, ax=ax_arr[i]).set(
+            title=f"{vcf.label} qualitites ({nbr_missing} missing)"
+        )
+
+    for i in range(len(vcfs), len(ax_arr)):
+        ax_arr[i].set_axis_off()
+
+    plt.savefig(outpath, bbox_inches="tight")
     plt.close()

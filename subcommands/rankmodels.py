@@ -63,7 +63,7 @@ def rankmodels_command(
                 vmax=0.3,
                 center=0,
                 square=True,
-                linewidths=0.5,
+                linewidths=0.5, # type: ignore
                 cbar_kws={"shrink": 0.5},
             )
 

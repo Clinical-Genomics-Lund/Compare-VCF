@@ -12,31 +12,29 @@ pip install -r requirements.txt
 
 ### Usage
 
-Inputs can be gzipped:
+Inputs can be gzipped.
+
+The functionality is organized into sub commands. Currently the two commands are `overview` and `rankmodels`.
 
 ```
-python compare_vcf.py \
-    --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
-    --labels first second third \
-    --outdir testout
-```
-
-Extended command:
-
-```
-python compare_vcf.py \
+python compare_vcf.py overview \
     --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
     --labels first second third \
     --outdir testout \
-    --scorekey RankScore \
-    --topn 200
+    --contig chr20    # If you want to quickly run a subset of the data
 ```
 
-#### Other settings
+For comparing rank model and rank model scores among variants.
 
-* `--scorekey` Scoring in INFO field determining what variants are "top ranked".
-* `--topn` Among the "top ranked" variants, how many to study.
-* `--contig "chr1"` Limit analysis to one contig.
+```
+python compare_vcf.py rankmodels \
+    --inputs run1.vcf.gz run2.vcf.gz run3.vcf.gz \
+    --labels first second third \
+    --outdir testout \
+    --topn 200 \
+    --rankmodels "" run2_model.ini run3_model.ini \ # Optional, "" for missing if some rank models are present
+    --contig chr20
+```
 
 ### Outputs
 

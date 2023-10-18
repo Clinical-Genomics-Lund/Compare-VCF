@@ -70,13 +70,6 @@ class Variant:
 
 
 class VCF:
-    # __fh: VariantFile
-    # _variantDict: dict[str, Variant]
-    # _filepath: str
-    # _scores: list[int]
-    # label: str
-    # variants: list[Variant]
-
     def __init__(self, label, filename):
         # self.__fh: VariantFile
         self.label: str = label

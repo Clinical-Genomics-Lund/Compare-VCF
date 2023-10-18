@@ -38,6 +38,11 @@ def add_overview_parser(subparsers):
     parser.add_argument(
         "--annotations", help="Study scoring present in INFO field", action="store_true"
     )
+    parser.add_argument(
+        "--skip_snp_density_histogram",
+        action="store_true",
+        help="Skip generating SNP density histograms (this might take a minute or two)",
+    )
 
 
 def add_rank_model_parser(subparsers):

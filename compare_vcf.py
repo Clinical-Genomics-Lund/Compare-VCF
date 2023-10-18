@@ -19,7 +19,12 @@ def main():
     os.makedirs(args.outdir, exist_ok=True)
 
     if args.subcommand == "overview":
-        overview_command(datasets, args.contig, args.outdir)
+        overview_command(
+            datasets,
+            args.contig,
+            args.outdir,
+            skip_density_histogram=args.skip_snp_density_histogram,
+        )
 
     elif args.subcommand == "rankmodels":
         if args.rankmodels is not None:

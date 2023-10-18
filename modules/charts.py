@@ -136,7 +136,7 @@ def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(nsre, s)]
 
 
-def write_snp_density_histograms(vcfs: list[VCF], outbase: str):
+def write_snv_density_histograms(vcfs: list[VCF], outbase: str):
     for vcf in vcfs:
         write_snp_for_vcf(vcf, f"{outbase}/snp_density_{vcf.label}.png")
 

@@ -1,6 +1,7 @@
 from classes.vcf import VCF
 import modules.annotations as annotations
 import modules.charts as charts
+import modules.tabletools as tabletools
 import os
 
 
@@ -13,7 +14,7 @@ def overview_command(vcfs: list[VCF], contig: str | None, outdir: str):
 
     charts.write_count_upset(variant_keys_per_ds, f"{outdir}/overlaps.png")
     os.makedirs(f"{outdir}/intersects", exist_ok=True)
-    charts.write_vcf_intersects(variant_keys_per_ds, f"{outdir}/intersects")
+    tabletools.write_vcf_intersects(variant_keys_per_ds, f"{outdir}/intersects")
 
     annotations.write_annotations_table(vcfs, f"{outdir}/annotations.tsv")
 

@@ -7,6 +7,7 @@ class Variant:
     pos: int
     ref: str | None
     alt: tuple[str, ...] | None
+    qual: int | None
     score: int | None
     info: dict[str, tuple[str]]
     header: VariantHeader
@@ -53,6 +54,7 @@ class Variant:
         pos: int,
         ref: str | None,
         alt: tuple[str, ...] | None,
+        qual: int | None,
         rankScore: int | None,
         info: dict[str, tuple[str]],
         header: VariantHeader,
@@ -62,11 +64,12 @@ class Variant:
         self.ref = ref
         self.alt = alt
         self.score = rankScore
+        self.qual = qual
         self.info = info
         self.header = header
 
 
-class Dataset:
+class VCF:
     __fh: VariantFile
     _variantDict: dict[str, Variant]
     _filepath: str
@@ -111,6 +114,17 @@ class Dataset:
     def getAnnotations(self) -> list[str]:
         return [info[0] for info in self.__fh.header.info.items()]
 
+    def getQualities(self) -> tuple[list[int], int]:
+        """Returns a list of qualities, and an index with the number of missing"""
+        nbr_missing = 0
+        quals = []
+        for variant in self.variants:
+            if variant.qual is None:
+                nbr_missing += 1
+            else:
+                quals.append(variant.qual)
+        return (quals, nbr_missing)
+
     def parse(self, score_key: str | None = None, contigs=None) -> None:
         self.__fh = VariantFile(self._filepath)
         fh = self.__fh.fetch(contigs)
@@ -129,6 +143,7 @@ class Dataset:
                 record.pos,
                 record.ref,
                 record.alts,
+                record.qual,
                 rank_score,
                 {item[0]: item[1] for item in record.info.items()},
                 record.header,

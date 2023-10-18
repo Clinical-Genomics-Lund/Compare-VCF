@@ -4,6 +4,8 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 
+from classes.vcf import VCF
+
 
 def write_count_bars(variant_per_dataset: dict[str, set[str]], outpath: str) -> None:
     labels = []
@@ -80,3 +82,48 @@ def show_histogram(
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 
 
+def write_histograms(
+    values_df: pd.DataFrame,
+    outpath: str,
+    title: str = "",
+    figsize: tuple[int, int] = (15, 15),
+    nbr_columns: int = 4,
+):
+    nbr_rows = len(values_df.columns) // nbr_columns + 1
+    fig, axes = plt.subplots(nbr_rows, nbr_columns, figsize=figsize)
+    ax = axes.flatten()
+
+    for i, col in enumerate(values_df.columns):
+        sns.histplot(values_df[col], ax=ax[i])
+        # ax[i].set_title(col)
+
+    if title != "":
+        fig.suptitle(title)
+    fig.tight_layout()
+
+    plt.savefig(outpath)
+    plt.close()
+
+
+def write_quality_histograms(
+    vcfs: list[VCF],
+    outpath: str,
+    figsize: tuple[int, int] = (15, 15),
+    nbr_columns: int = 3,
+):
+    nbr_rows = len(vcfs) // nbr_columns + 1
+    _fig, axes = plt.subplots(nbr_rows, nbr_columns, figsize=figsize)
+    ax_arr = axes.flatten()
+    for i, vcf in enumerate(vcfs):
+        (quals, nbr_missing) = vcf.getQualities()
+
+        # plt.hist(quals)
+        sns.histplot(quals, ax=ax_arr[i]).set(
+            title=f"{vcf.label} qualitites ({nbr_missing} missing)"
+        )
+
+    for i in range(len(vcfs), len(ax_arr)):
+        ax_arr[i].set_axis_off()
+
+    plt.savefig(outpath, bbox_inches="tight")
+    plt.close()

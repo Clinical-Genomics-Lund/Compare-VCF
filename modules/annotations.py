@@ -1,9 +1,9 @@
 import pandas as pd
 
-from modules.dataset import Dataset
+from classes.vcf import VCF
 
 
-def write_annotations_table(datasets: list[Dataset], filepath: str):
+def write_annotations_table(datasets: list[VCF], filepath: str):
     annot_dicts = []
     for ds in datasets:
         annot_dict = dict()

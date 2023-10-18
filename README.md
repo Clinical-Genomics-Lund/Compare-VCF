@@ -36,7 +36,9 @@ python compare_vcf.py rankmodels \
     --contig chr20
 ```
 
-### Outputs
+### Subset of outputs
+
+FIXME: Update to show latest outputs for each of the sub commands.
 
 Number called variants among the different vcf-files.
 

@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
+import re
 
 from classes.vcf import VCF
 import modules.util as util
@@ -40,11 +41,13 @@ def write_vcf_intersects(datasets: dict[str, set[str]], outdir: str) -> None:
     for comb in combinations:
         true_rows = df_flat_index[list(comb)].all(axis=1)
         keys = list(df_flat_index.loc[true_rows, "id"])
-        split_keys = [myid.split("-") for myid in keys]
-        out_df = pd.DataFrame(split_keys, columns=["Position", "SNV"])
+        split_keys = [re.split("[-:]", myid) for myid in keys]
+        out_df = pd.DataFrame(split_keys, columns=["Chr", "Position", "Ref", "Var"])
+        out_df[["Position"]] = out_df[["Position"]].astype(int)
+        out_df.sort_values(by=["Chr", "Position"], inplace=True)
         out_label = "_".join(list(comb))
-        out_path = f"outdir/{out_label}.csv"
-        out_df.to_csv(out_path, sep="\t")
+        out_path = f"{outdir}/{out_label}.csv"
+        out_df.to_csv(out_path, index=False)
 
     # upsetplot.plot(df)
     # plt.savefig(outdir)

@@ -1,3 +1,5 @@
+import itertools
+
 from classes.vcf import VCF
 
 
@@ -33,6 +35,25 @@ def get_scores_for_shared_variants(
         shared_scores.append(shared_score)
 
     return shared_scores
+
+
+def get_all_pairs_in_list(my_list: list[str]) -> list[tuple[str, str]]:
+    return_list = list()
+    for i in range(len(my_list)):
+        first = my_list[i]
+        for j in range(i + 1, len(my_list)):
+            second = my_list[j]
+            pair = (first, second)
+            return_list.append(pair)
+    return return_list
+
+
+def get_all_combinations(my_list: list[str]) -> list[list[str]]:
+    combinations = list()
+    for size in range(1, len(my_list)):
+        combs_with_size = itertools.combinations(my_list, size)
+        combinations.extend(combs_with_size)
+    return combinations
 
 
 # def get_rankscore_categories(rank_model: RankModel, categories_key: str) -> list[str]:

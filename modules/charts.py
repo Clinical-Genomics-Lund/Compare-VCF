@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
+import re
 
 from classes.vcf import VCF
 
@@ -125,5 +126,47 @@ def write_quality_histograms(
     for i in range(len(vcfs), len(ax_arr)):
         ax_arr[i].set_axis_off()
 
+    plt.savefig(outpath, bbox_inches="tight")
+    plt.close()
+
+
+# https://stackoverflow.com/questions/19366517/how-to-sort-a-list-containing-alphanumeric-values
+def natural_sort_key(s):
+    nsre = re.compile("([0-9]+)")
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(nsre, s)]
+
+
+def write_snp_density_histograms(vcfs: list[VCF], outbase: str):
+    for vcf in vcfs:
+        write_snp_for_vcf(vcf, f"{outbase}/snp_density_{vcf.label}.png")
+
+
+def write_snp_for_vcf(vcf: VCF, outpath: str):
+    # Get used contigs
+    # FIXME: In VCF class
+    used_contigs = set()
+    for variant in vcf.variants:
+        used_contigs.add(variant.contig)
+    used_contigs_list = sorted(list(used_contigs), key=natural_sort_key)
+
+    # Extract positions per contig
+    contig_to_pos_dict = dict()
+    for contig in used_contigs_list:
+        contig_positions = list()
+        for var in vcf.getVariantPerContig(contig):
+            snv_pos = var.pos
+            contig_positions.append(snv_pos)
+        contig_to_pos_dict[contig] = contig_positions
+
+    # Actual plotting
+    fig, axes = plt.subplots(len(contig_to_pos_dict), 1, figsize=(15, 40))
+    for i, (contig, counts) in enumerate(contig_to_pos_dict.items()):
+        # plt.subplot(4, 4, i)
+        # plt.subplot(i)
+        histplot = sns.histplot(counts, bins=200, ax=axes[i])
+        histplot.set_title(contig)
+        histplot.set(ylabel=None)
+    # fig.tight_layout()
+    plt.subplots_adjust(hspace=0.6)
     plt.savefig(outpath, bbox_inches="tight")
     plt.close()

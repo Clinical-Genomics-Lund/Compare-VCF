@@ -70,19 +70,21 @@ class Variant:
 
 
 class VCF:
-    __fh: VariantFile
-    _variantDict: dict[str, Variant]
-    _filepath: str
-    _scores: list[int]
-    label: str
-    variants: list[Variant]
+    # __fh: VariantFile
+    # _variantDict: dict[str, Variant]
+    # _filepath: str
+    # _scores: list[int]
+    # label: str
+    # variants: list[Variant]
 
     def __init__(self, label, filename):
-        self.label = label
-        self._filepath = filename
-        self._scores = list()
-        self.variants = list()
-        self._variantDict = dict()
+        # self.__fh: VariantFile
+        self.label: str = label
+        self._filepath: str = filename
+        self._scores: list[int] = list()
+        self.variants: list[Variant] = list()
+        self._variantDict: dict[str, Variant] = dict()
+        self._variants_per_contig_cache: dict[str, list[Variant]] = dict()
 
     def hasScores(self) -> bool:
         return len(self._scores) > 0
@@ -92,6 +94,17 @@ class VCF:
 
     def getVariantByKey(self, key: str) -> Variant | None:
         return self._variantDict.get(key)
+
+    def getVariantPerContig(self, target_contig: str) -> list[Variant]:
+        if len(self._variants_per_contig_cache) == 0:
+            for variant in self.variants:
+                contig = variant.contig
+                if self._variants_per_contig_cache.get(contig) is None:
+                    self._variants_per_contig_cache[contig] = list()
+                self._variants_per_contig_cache[contig].append(variant)
+        elif self._variants_per_contig_cache.get(target_contig) is None:
+            self._variants_per_contig_cache[target_contig] = list()
+        return self._variants_per_contig_cache[target_contig]
 
     def getScoreByKey(self, key: str) -> int | None:
         var = self._variantDict.get(key)

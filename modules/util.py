@@ -54,10 +54,3 @@ def get_all_combinations(my_list: list[str]) -> list[list[str]]:
         combs_with_size = itertools.combinations(my_list, size)
         combinations.extend(combs_with_size)
     return combinations
-
-
-# def get_rankscore_categories(rank_model: RankModel, categories_key: str) -> list[str]:
-#     # config = ConfigObj(rankmodel_path)
-#     # categories_section = config[categories_key]
-#     categories_keys = categories_section.keys()  # type: ignore
-#     return categories_keys

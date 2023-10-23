@@ -1,5 +1,7 @@
 from pysam import VariantFile, VariantHeader
 
+import modules.util as util
+
 
 class Variant:
     key: str
@@ -78,6 +80,7 @@ class VCF:
         self.variants: list[Variant] = list()
         self._variantDict: dict[str, Variant] = dict()
         self._variants_per_contig_cache: dict[str, list[Variant]] = dict()
+        self._contigs = list()
 
     def hasScores(self) -> bool:
         return len(self._scores) > 0
@@ -88,7 +91,10 @@ class VCF:
     def getVariantByKey(self, key: str) -> Variant | None:
         return self._variantDict.get(key)
 
-    def getVariantPerContig(self, target_contig: str) -> list[Variant]:
+    def getContigs(self) -> list[str]:
+        return self._contigs
+
+    def getVariantsInContig(self, target_contig: str) -> list[Variant]:
         if len(self._variants_per_contig_cache) == 0:
             for variant in self.variants:
                 contig = variant.contig
@@ -98,6 +104,13 @@ class VCF:
         elif self._variants_per_contig_cache.get(target_contig) is None:
             self._variants_per_contig_cache[target_contig] = list()
         return self._variants_per_contig_cache[target_contig]
+
+    def getVariantsPerContig(self) -> dict[str, list[Variant]]:
+        variantsPerContig = dict()
+        for contig in self._contigs:
+            variants = self.getVariantsInContig(contig)
+            variantsPerContig[contig] = variants
+        return variantsPerContig
 
     def getScoreByKey(self, key: str) -> int | None:
         var = self._variantDict.get(key)
@@ -137,6 +150,7 @@ class VCF:
         has_rank_score = (
             score_key is not None and self.__fh.header.info.get(score_key) is not None
         )
+        all_contigs = set()
         for record in fh:
             rank_score = None
             if score_key is not None and has_rank_score:
@@ -154,8 +168,10 @@ class VCF:
                 {item[0]: item[1] for item in record.info.items()},
                 record.header,
             )
+            all_contigs.add(record.contig)
             self.variants.append(variant)
             self._variantDict[variant.getKey()] = variant
+        self._contigs = util.natural_sort(list(all_contigs))
 
     def __str__(self):
         return f"{self.label}\t{len(self.variants)}\t{self._filepath}"

@@ -3,19 +3,22 @@ from matplotlib import pyplot as plt
 import numpy as np
 import seaborn as sns
 import pandas as pd
-import re
+import modules.util as util
 
 from classes.vcf import VCF
 
+VariantsPerDs = dict[str, set[str]]
 
-def write_count_bars(variant_per_dataset: dict[str, set[str]], outpath: str) -> None:
+
+def write_count_bars(variant_per_dataset: VariantsPerDs, outpath: str) -> None:
+    # def write_count_bars(variant_per_dataset: dict[str, set[str]], outpath: str) -> None:
     labels = []
     sizes = []
     for label, entries in variant_per_dataset.items():
         labels.append(label)
         sizes.append(len(entries))
 
-    y_pos = np.arange(len(labels))
+    y_pos = np.arange(0, len(labels))
 
     plt.bar(y_pos, sizes, align="center", alpha=0.5)
     plt.xticks(y_pos, labels)
@@ -130,10 +133,10 @@ def write_quality_histograms(
     plt.close()
 
 
-# https://stackoverflow.com/questions/19366517/how-to-sort-a-list-containing-alphanumeric-values
-def natural_sort_key(s):
-    nsre = re.compile("([0-9]+)")
-    return [int(text) if text.isdigit() else text.lower() for text in re.split(nsre, s)]
+# # https://stackoverflow.com/questions/19366517/how-to-sort-a-list-containing-alphanumeric-values
+# def natural_sort_key(s):
+#     nsre = re.compile("([0-9]+)")
+#     return [int(text) if text.isdigit() else text.lower() for text in re.split(nsre, s)]
 
 
 def write_snv_density_histograms(vcfs: list[VCF], outbase: str):
@@ -147,13 +150,14 @@ def write_snp_for_vcf(vcf: VCF, outpath: str):
     used_contigs = set()
     for variant in vcf.variants:
         used_contigs.add(variant.contig)
-    used_contigs_list = sorted(list(used_contigs), key=natural_sort_key)
+    used_contigs_list = util.natural_sort(list(used_contigs))
+    # used_contigs_list = sorted(list(used_contigs), key=natural_sort_key)
 
     # Extract positions per contig
     contig_to_pos_dict = dict()
     for contig in used_contigs_list:
         contig_positions = list()
-        for var in vcf.getVariantPerContig(contig):
+        for var in vcf.getVariantsInContig(contig):
             snv_pos = var.pos
             contig_positions.append(snv_pos)
         contig_to_pos_dict[contig] = contig_positions
@@ -163,10 +167,47 @@ def write_snp_for_vcf(vcf: VCF, outpath: str):
     for i, (contig, counts) in enumerate(contig_to_pos_dict.items()):
         # plt.subplot(4, 4, i)
         # plt.subplot(i)
-        histplot = sns.histplot(counts, bins=200, ax=axes[i])
+        histplot = sns.histplot(counts, bins=200, ax=axes[i])  # type: ignore
         histplot.set_title(contig)
         histplot.set(ylabel=None)
     # fig.tight_layout()
     plt.subplots_adjust(hspace=0.6)
     plt.savefig(outpath, bbox_inches="tight")
     plt.close()
+
+
+def write_per_chromosome_bars(vcfs: list[VCF], outpath: str):
+    columns = {"dataset": [], "contig": [], "count": []}
+
+    for vcf in vcfs:
+        variantsPerContig = vcf.getVariantsPerContig()
+        for contig in variantsPerContig.keys():
+            contig_count = len(variantsPerContig[contig])
+            columns["dataset"].append(vcf.label)
+            columns["contig"].append(contig)
+            columns["count"].append(contig_count)
+
+    df = pd.DataFrame(columns)
+
+    # sns.set(rc={"figure.figsize": (15, 10)})
+    # _fig, axes = plt.subplots(1, 1, figsize=(20, 15))
+    # plt.figure(figsize=(40, 20))
+    g = sns.catplot(
+        x="contig", y="count", hue="dataset", data=df, kind="bar", height=10, aspect=2
+    )
+    g.set_xticklabels(rotation=90)
+    g.set(title="Number variants per contig")
+
+    plt.savefig(outpath, bbox_inches="tight")
+    plt.close()
+
+    # nbr_rows = len(vcfs) // nbr_columns + 1
+    # _fig, axes = plt.subplots(nbr_rows, nbr_columns, figsize=figsize)
+    # ax_arr = axes.flatten()
+    # for i, vcf in enumerate(vcfs):
+    #     (quals, nbr_missing) = vcf.getQualities()
+
+    #     # plt.hist(quals)
+    #     sns.histplot(quals, ax=ax_arr[i]).set(
+    #         title=f"{vcf.label} qualitites ({nbr_missing} missing)"
+    #     )

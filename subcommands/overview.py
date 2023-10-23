@@ -14,10 +14,14 @@ def overview_command(
 ):
     start_time = time.time()
 
+    print("Parsing VCF files")
     for ds in vcfs:
         ds.parse(score_key=None, contigs=contig)
 
     variant_keys_per_ds = {ds.label: ds.getVariantKeys() for ds in vcfs}
+
+    print("Rendering per-chromosome variant counts")
+    charts.write_per_chromosome_bars(vcfs, f"{outdir}/counts_per_contig.png")
 
     print("Rendering count bars")
     charts.write_count_bars(variant_keys_per_ds, f"{outdir}/total_counts.png")

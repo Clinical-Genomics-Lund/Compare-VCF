@@ -18,6 +18,7 @@ def get_all_combinations(my_list: list[str]) -> list[list[str]]:
     for size in range(1, len(my_list)):
         combs_with_size = itertools.combinations(my_list, size)
         combinations.extend(combs_with_size)
+    combinations.append(tuple(my_list))
     return combinations
 
 

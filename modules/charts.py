@@ -167,7 +167,10 @@ def write_snp_for_vcf(vcf: VCF, outpath: str):
     for i, (contig, counts) in enumerate(contig_to_pos_dict.items()):
         # plt.subplot(4, 4, i)
         # plt.subplot(i)
-        histplot = sns.histplot(counts, bins=200, ax=axes[i])  # type: ignore
+        if len(contig_to_pos_dict) > 1:
+            histplot = sns.histplot(counts, bins=200, ax=axes[i])  # type: ignore
+        else:
+            histplot = sns.histplot(counts, bins=200)  # type: ignore
         histplot.set_title(contig)
         histplot.set(ylabel=None)
     # fig.tight_layout()

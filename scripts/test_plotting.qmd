@@ -1,0 +1,81 @@
+```{python}
+import os, sys
+
+# dir2 = os.path.abspath('')
+# dir2 = os.path.abspath('')
+# dir1 = os.path.dirname(dir2)
+vcf_compare = "/home/jakob/src/VCFCompare"
+if not vcf_compare in sys.path:
+    sys.path.append(vcf_compare)
+```
+
+```{python}
+import importlib
+
+```
+
+```{python}
+sys.path
+```
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+```
+
+```{python}
+# from classes.vcf import VCF
+import classes.vcf
+
+```
+
+```{python}
+d = {"a": 3}
+```
+
+```{python}
+importlib.reload(sys.modules["classes.vcf"])
+
+
+paths = {
+    "deepvariant": "/home/jakob/proj/2_2309_rd_evaluate/data/231004_deepvariant/giab_full_split_rmdup.intersect.chr.vcf.gz",
+    "lund": "/home/jakob/proj/2_2309_rd_evaluate/data/231004_lund_wgs_snv/group.scored.chr.vcf.gz",
+    "dnascope": "/home/jakob/proj/2_2309_rd_evaluate/data/231012_nfcore_lundrank/giab_full_ranked_snv.infotrim.chr.vcf.gz",
+    "giab": "/home/jakob/proj/2_2309_rd_evaluate/data/231004_giab_nist/exons.vcf.gz",
+}
+
+vcfs = dict()
+for label, vcf_path in paths.items():
+    vcf = classes.vcf.VCF(label, vcf_path)
+    vcf.parse()
+    vcfs[label] = vcf
+
+# VCF("label", "")
+```
+
+```{python}
+
+columns = {"dataset": [], "contig": [], "count": []}
+
+for ds_label, vcf in vcfs.items():
+    variantsPerContig = vcfs[ds_label].getVariantsPerContig()
+    for contig in variantsPerContig.keys():
+        contig_count = len(variantsPerContig[contig])
+        columns["dataset"].append(ds_label)
+        columns["contig"].append(contig)
+        columns["count"].append(contig_count)
+
+df = pd.DataFrame(columns)
+df
+```
+
+
+```{python}
+# mpl.rcParams['figure.figsize'] = [15, 5]
+g = sns.catplot(x="contig", y="count", hue="dataset", data=df, kind="bar")
+g.set_xticklabels(rotation=90)
+g.set(title="Number variants per contig")
+```

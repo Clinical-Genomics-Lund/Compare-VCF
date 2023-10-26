@@ -19,8 +19,10 @@ def rankmodels_command(
     topn: int,
     rank_models: list[RankModel],
 ):
+    print("Parsing VCFs")
     for vcf in vcfs:
         vcf.parse(SCOREKEY, contig)
+    print("Writing histogram pairs")
     for vcf in vcfs:
         charts.write_histogram_pair(
             vcf.label,
@@ -29,7 +31,9 @@ def rankmodels_command(
             f"{outdir}/{vcf.label}_hist.png",
         )
 
+    print("Writing frequency heatmaps")
     heatmap.write_freq_heatmaps(vcfs, outdir, topn)
+    print("Writing score table")
     ranktable.write_score_table(
         vcfs,
         topn,
@@ -37,7 +41,7 @@ def rankmodels_command(
         rank_models,
     )
 
-    # FIXME: Distribution histograms
+    print("Rank model details")
     if rank_models is not None:
         for i, vcf in enumerate(vcfs):
             key_col_name = "key"
@@ -63,7 +67,7 @@ def rankmodels_command(
                 vmax=0.3,
                 center=0,
                 square=True,
-                linewidths=0.5, # type: ignore
+                linewidths=0.5,  # type: ignore
                 cbar_kws={"shrink": 0.5},
             )
 

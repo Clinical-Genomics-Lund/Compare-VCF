@@ -48,36 +48,26 @@ def rankmodels_command(
             scores_df = ranktable.get_rank_categories_scores(
                 vcf, rank_models[i], key_col_name, None
             )
+
             charts.write_histograms(
                 scores_df, f"{outdir}/{vcf.label}_rank_histograms.png", vcf.label
             )
             corr_df = scores_df.corr(method="spearman")
-
-            # corr_df.style.background_gradient(cmap="coolwarm").format(precision=2)
             corr_df.to_excel(f"{outdir}/{vcf.label}_category_spearman.xlsx")
-
-            sns.set_theme(style="white")
-            mask = np.triu(np.ones_like(corr_df, dtype=bool))
-            f, ax = plt.subplots(figsize=(11, 9))
-            cmap = sns.diverging_palette(230, 20, as_cmap=True)
-            sns.heatmap(
-                corr_df,
-                mask=mask,
-                cmap=cmap,
-                vmax=0.3,
-                center=0,
-                square=True,
-                linewidths=0.5,  # type: ignore
-                cbar_kws={"shrink": 0.5},
+            charts.write_corr_heatmap(
+                corr_df, f"{outdir}/{vcf.label}_category_spearman.png"
             )
 
-            # fig = plt.figure(figsize=(15, 15))
-            # plt.matshow(corr_df, fignum=fig.number)
-            # plt.xticks(corr_df.columns)
-            # plt.yticks(corr_df.columns)
-            plt.title(f"Rank model categories Spearman correlation", fontsize=16)
-            f.tight_layout()
-            plt.savefig(f"{outdir}/{vcf.label}_category_spearman.png")
-            plt.close()
-
-    # FIXME: Correlation scores matrix
+            topn_scores_df = scores_df.sort_values("score", ascending=False).head(topn)
+            charts.write_histograms(
+                topn_scores_df,
+                f"{outdir}/{vcf.label}_top{topn}_rank_histograms.png",
+                vcf.label,
+            )
+            topn_corr_df = topn_scores_df.corr(method="spearman")
+            topn_corr_df.to_excel(
+                f"{outdir}/{vcf.label}_top{topn}_category_spearman.xlsx"
+            )
+            charts.write_corr_heatmap(
+                corr_df, f"{outdir}/{vcf.label}_top{topn}_category_spearman.png"
+            )

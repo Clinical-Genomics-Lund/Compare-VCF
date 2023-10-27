@@ -31,7 +31,7 @@ def write_score_table(
 
             top_df = pd.concat([top_df, rank_categories_df], axis=1)
 
-    top_df.to_csv(outpath, sep="\t", index=False)
+    top_df.to_csv(outpath, sep="\t", index=True)
 
 
 def get_rank_categories_scores(
@@ -59,6 +59,7 @@ def get_rank_categories_scores(
             variant, rank_model.categories
         )
         variant_ranks_dict[variant_column] = variant_key  # type: ignore
+        variant_ranks_dict["score"] = variant.score # type: ignore
         rank_result_dicts.append(variant_ranks_dict)
 
     dfs = [pd.DataFrame(d, index=[0]) for d in rank_result_dicts]

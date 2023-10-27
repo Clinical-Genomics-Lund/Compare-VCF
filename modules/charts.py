@@ -214,3 +214,30 @@ def write_per_chromosome_bars(vcfs: list[VCF], outpath: str):
     #     sns.histplot(quals, ax=ax_arr[i]).set(
     #         title=f"{vcf.label} qualitites ({nbr_missing} missing)"
     #     )
+
+
+def write_corr_heatmap(corr_df: pd.DataFrame, outpath: str):
+    sns.set_theme(style="white")
+    mask = np.triu(np.ones_like(corr_df, dtype=bool))
+    f, _ax = plt.subplots(figsize=(11, 9))
+    cmap = sns.diverging_palette(230, 20, as_cmap=True)
+    sns.heatmap(
+        corr_df,
+        mask=mask,
+        cmap=cmap,
+        vmax=0.3,
+        center=0,
+        square=True,
+        linewidths=0.5,  # type: ignore
+        cbar_kws={"shrink": 0.5},
+    )
+
+    # fig = plt.figure(figsize=(15, 15))
+    # plt.matshow(corr_df, fignum=fig.number)
+    # plt.xticks(corr_df.columns)
+    # plt.yticks(corr_df.columns)
+    plt.title(f"Rank model categories Spearman correlation", fontsize=16)
+    f.tight_layout()
+    # plt.savefig(f"{outdir}/{vcf.label}_category_spearman.png")
+    plt.savefig(outpath)
+    plt.close()

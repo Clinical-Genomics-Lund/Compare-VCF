@@ -151,7 +151,16 @@ class VCF:
             score_key is not None and self.__fh.header.info.get(score_key) is not None
         )
         all_contigs = set()
+        nbr_filtered = 0
+        filtered_fields = set()
         for record in fh:
+
+            pass_values = set(["PASS"])
+            if len(record.filter.keys()) > 0 and not any(x in record.filter.keys() for x in pass_values):
+                nbr_filtered += 1
+                filtered_fields.update(record.filter.keys())
+                continue
+
             rank_score = None
             if score_key is not None and has_rank_score:
                 rank_score_cell = record.info.get(score_key)
@@ -171,6 +180,10 @@ class VCF:
             all_contigs.add(record.contig)
             self.variants.append(variant)
             self._variantDict[variant.getKey()] = variant
+
+        if nbr_filtered > 0:
+            fields_str = " ".join(list(filtered_fields))
+            print(f"Filtered {nbr_filtered} non-pass entries with fields: {fields_str}")
         self._contigs = util.natural_sort(list(all_contigs))
 
     def __str__(self):

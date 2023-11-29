@@ -24,7 +24,6 @@ def parse_arguments():
 
 def add_overview_parser(subparsers):
     parser = subparsers.add_parser("overview")
-    parser = subparsers.add_parser("overview")
     parser.add_argument(
         "-i", "--inputs", required=True, help="Input VCF files", nargs="+"
     )
@@ -67,6 +66,11 @@ def add_rank_model_parser(subparsers):
         "--contig",
         default=None,
         help="Limit analysis to one contig",
+    )
+    parser.add_argument(
+        "--true_variants",
+        default=None,
+        help="If available, the truth baseline can be supplied as a VCF file",
     )
 
 

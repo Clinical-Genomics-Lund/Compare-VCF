@@ -13,7 +13,11 @@ RANK_RESULT = "RankResult"
 
 
 def write_score_table(
-    vcfs: list[VCF], top_n: int, outpath: str, rank_models: list[RankModel] | None
+    vcfs: list[VCF],
+    top_n: int,
+    outpath: str,
+    rank_models: list[RankModel] | None,
+    true_variants: set[str] | None,
 ):
     (all_top_keys, top_keys_per_ds) = get_top_scored_keys(vcfs, top_n)
     variant_column = "key"
@@ -31,6 +35,15 @@ def write_score_table(
 
             top_df = pd.concat([top_df, rank_categories_df], axis=1)
 
+    if true_variants is not None:
+        truth_col = list()
+        for key in top_df.index:
+            key_is_true = True if key in true_variants else False
+            truth_col.append(key_is_true)
+
+        top_df["truth"] = truth_col
+
+    # FIXME: Insert true variants here
     top_df.to_csv(outpath, sep="\t", index=True)
 
 
@@ -59,7 +72,7 @@ def get_rank_categories_scores(
             variant, rank_model.categories
         )
         variant_ranks_dict[variant_column] = variant_key  # type: ignore
-        variant_ranks_dict["score"] = variant.score # type: ignore
+        variant_ranks_dict["score"] = variant.score  # type: ignore
         rank_result_dicts.append(variant_ranks_dict)
 
     dfs = [pd.DataFrame(d, index=[0]) for d in rank_result_dicts]
@@ -113,17 +126,18 @@ def build_data_frame(
     return top_df
 
 
+# FIXME - Skip the "in top"
 def get_dataset_columns(
     ds: VCF, all_top_keys: set[str], ds_top_keys: set[str], top_n: int
 ) -> dict[str, list[bool | int | str]]:
     col_dict = dict()
     # FIXME: Avoid hard-coding, lift this up from this function
-    present_label = f"{ds.label}_present"
+    present_label = f"{ds.label}"
     col_dict[present_label] = [
         ds.getVariantByKey(key) is not None for key in all_top_keys
     ]
-    top_n_label = f"{ds.label}_top{top_n}"
-    col_dict[top_n_label] = [key in ds_top_keys for key in all_top_keys]
+    # top_n_label = f"{ds.label}_top{top_n}"
+    # col_dict[top_n_label] = [key in ds_top_keys for key in all_top_keys]
     score_label = f"{ds.label}_score"
     col_dict[score_label] = [ds.getScoreByKey(key) for key in all_top_keys]
     return col_dict

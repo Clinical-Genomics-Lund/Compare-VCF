@@ -28,11 +28,20 @@ def main():
 
     elif args.subcommand == "rankmodels":
         if args.rankmodels is not None:
-            rankmodels = [RankModel(path) for path in args.rankmodels]
+            rank_models = [RankModel(path) for path in args.rankmodels]
         else:
-            rankmodels = []
+            rank_models = []
 
-        rankmodels_command(datasets, args.contig, args.outdir, args.topn, rankmodels)
+        if args.true_variants is not None:
+            truth_vcf = VCF("true_variants", args.true_variants)
+            truth_vcf.parse()
+            true_variants = truth_vcf.getVariantKeys()
+        else:
+            true_variants = None
+
+        rankmodels_command(
+            datasets, args.contig, args.outdir, args.topn, rank_models, true_variants
+        )
 
     else:
         # FIXME: Programatically calculate

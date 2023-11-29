@@ -82,6 +82,11 @@ def show_histogram(
 
     hue_col = f"Top {top_n}"
     palette = {"above": "red", "below": "blue"}
+    if len(df.Scores.unique()) < 2:
+        print(
+            f"Skipping histogram, must have at least two unique values, found: {df.Scores.unique()}"
+        )
+        return
     ax = sns.histplot(df, x="Scores", hue=hue_col, binwidth=1, palette=palette)
     ax.set(xlabel=xLabel, ylabel=yLabel, title=label)
 

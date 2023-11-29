@@ -4,9 +4,6 @@ import modules.charts as charts
 import modules.charts as charts
 import modules.heatmap as heatmap
 import modules.ranktable as ranktable
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 
 
 SCOREKEY = "RankScore"
@@ -18,9 +15,11 @@ def rankmodels_command(
     outdir: str,
     topn: int,
     rank_models: list[RankModel],
+    true_variants: set[str] | None,
 ):
     print("Parsing VCFs")
     for vcf in vcfs:
+        print(f"Parsing: {vcf.label}")
         vcf.parse(SCOREKEY, contig)
     print("Writing histogram pairs")
     for vcf in vcfs:
@@ -39,6 +38,7 @@ def rankmodels_command(
         topn,
         f"{outdir}/rank_table_top{topn}.tsv",
         rank_models,
+        true_variants,
     )
 
     print("Rank model details")
@@ -69,5 +69,5 @@ def rankmodels_command(
                 f"{outdir}/{vcf.label}_top{topn}_category_spearman.xlsx"
             )
             charts.write_corr_heatmap(
-                corr_df, f"{outdir}/{vcf.label}_top{topn}_category_spearman.png"
+                topn_corr_df, f"{outdir}/{vcf.label}_top{topn}_category_spearman.png"
             )

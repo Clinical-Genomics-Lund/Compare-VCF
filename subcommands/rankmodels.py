@@ -32,17 +32,18 @@ def rankmodels_command(
 
     print("Writing frequency heatmaps")
     heatmap.write_freq_heatmaps(vcfs, outdir, topn)
-    print("Writing score table")
-    ranktable.write_score_table(
-        vcfs,
-        topn,
-        f"{outdir}/rank_table_top{topn}.tsv",
-        rank_models,
-        true_variants,
-    )
 
     print("Rank model details")
     if rank_models is not None:
+        print("Writing score table")
+        ranktable.write_score_table(
+            vcfs,
+            topn,
+            f"{outdir}/rank_table_top{topn}.tsv",
+            rank_models,
+            true_variants,
+        )
+
         for i, vcf in enumerate(vcfs):
             key_col_name = "key"
             scores_df = ranktable.get_rank_categories_scores(

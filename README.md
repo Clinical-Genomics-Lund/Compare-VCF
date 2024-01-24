@@ -64,3 +64,4 @@ Score table. This will be extended.
 
 * More detailed annotation information in the output table.
 * Use the GIAB as a reference base line.
+
